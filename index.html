@@ -1,25 +1,320 @@
-# app.py (w Hugging Face Space)
-from flask import Flask, request, jsonify
-from datasets import load_dataset, Dataset
-import os
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twoje Pliki</title>
 
-app = Flask(__name__)
+    <style>
+        /* ======================================================================= */
+        /* --- CSS --- */
+        /* ======================================================================= */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Wyrównaj do góry */
+            min-height: 100vh;
+            color: #333;
+            box-sizing: border-box;
+        }
 
-DATASET_NAME = "twoj_uzytkownik/nazwa_twojego_datasetu"
+        .hidden {
+            display: none !important;
+        }
 
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part'})
+        /* Ekran logowania */
+        #login-screen {
+            text-align: center;
+            margin-top: 20vh;
+        }
+        .login-box input {
+            font-size: 1.5em;
+            padding: 10px;
+            width: 150px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin: 20px 0;
+            letter-spacing: 0.5em;
+        }
+        .login-box button {
+            font-size: 1em;
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+        .login-box button:hover {
+            background-color: #0056b3;
+        }
+        #error-message {
+            color: red;
+            margin-top: 10px;
+        }
 
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'})
+        /* Główny kontener aplikacji */
+        #app-container {
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
 
-    # Tutaj przetwórz plik i dodaj do datasetu
-    # ...
+        /* Ramka do uploadu */
+        #upload-area {
+            border: 3px dashed #ccc;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 30px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        #upload-area:hover, #upload-area.drag-over {
+            background-color: #f8f9fa;
+            border-color: #007bff;
+        }
+        #upload-icon {
+            font-size: 50px;
+            color: #ccc;
+            transition: color 0.2s;
+        }
+        #upload-area:hover #upload-icon {
+            color: #007bff;
+        }
 
-    return jsonify({'message': 'File uploaded successfully'})
+        /* Lista plików */
+        #file-list-container {
+            text-align: left;
+        }
+        #file-list {
+            list-style: none;
+            padding: 0;
+        }
+        #file-list li {
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1em;
+        }
+        #file-list a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: 500;
+        }
+        #file-list a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+    <!-- ======================================================================= -->
+    <!-- --- HTML --- -->
+    <!-- ======================================================================= -->
+    
+    <!-- Ekran logowania -->
+    <div id="login-screen">
+        <div class="login-box">
+            <h1>Wprowadź kod dostępu</h1>
+            <input type="password" id="access-code" placeholder="----" maxlength="4">
+            <button id="login-button">Wejdź</button>
+            <p id="error-message" class="hidden">Nieprawidłowy kod.</p>
+        </div>
+    </div>
+
+    <!-- Główna aplikacja (początkowo ukryta) -->
+    <div id="app-container" class="hidden">
+        <!-- Ramka do wrzucania plików -->
+        <div id="upload-area">
+            <div id="upload-icon">+</div>
+            <p>Upuść pliki tutaj lub kliknij, aby wybrać</p>
+            <input type="file" id="file-input" multiple hidden>
+        </div>
+
+        <!-- Lista wrzuconych plików -->
+        <div id="file-list-container">
+            <h2>Przechowywane pliki:</h2>
+            <ul id="file-list">
+                <!-- Pliki będą dodawane tutaj dynamicznie -->
+            </ul>
+        </div>
+    </div>
+
+
+    <script>
+    // =======================================================================
+    // --- JAVASCRIPT ---
+    // =======================================================================
+
+
+    // =======================================================================
+    // --- KONFIGURACJA ---
+    // Zastąp te wartości swoimi prawdziwymi danymi!
+    // =======================================================================
+
+    // 1. Podaj pełny adres URL do Twojej aplikacji na Hugging Face Space.
+    //    Znajdziesz go w ustawieniach Space, np. "https://nazwa-uzytkownika-nazwa-space.hf.space"
+    const BACKEND_URL = "https://TWOJA-NAZWA-SPACE.hf.space";
+
+    // 2. Podaj identyfikator Twojego repozytorium Dataset.
+    //    Jest potrzebny tylko do tworzenia linków do pobierania plików.
+    //    Np. "TwojaNazwaUzytkownika/nazwa-datasetu"
+    const REPO_ID_FOR_URL = "TWOJA_NAZWA_UZYTKOWNIKA/NAZWA_REPOZYTORIUM_DATASETU";
+
+    // 3. Kod dostępu, który wpisuje użytkownik.
+    const CORRECT_ACCESS_CODE = "2358";
+
+    // =======================================================================
+    // --- APLIKACJA ---
+    // Poniższego kodu nie musisz zmieniać.
+    // =======================================================================
+
+    // --- Elementy interfejsu (DOM) ---
+    const loginScreen = document.getElementById('login-screen');
+    const appContainer = document.getElementById('app-container');
+    const accessCodeInput = document.getElementById('access-code');
+    const loginButton = document.getElementById('login-button');
+    const errorMessage = document.getElementById('error-message');
+
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+    const fileList = document.getElementById('file-list');
+
+    // --- Logika aplikacji ---
+
+    // 1. Obsługa logowania
+    loginButton.addEventListener('click', () => {
+        if (accessCodeInput.value === CORRECT_ACCESS_CODE) {
+            errorMessage.classList.add('hidden');
+            loginScreen.classList.add('hidden');
+            appContainer.classList.remove('hidden');
+            loadFiles();
+        } else {
+            errorMessage.classList.remove('hidden');
+            accessCodeInput.value = "";
+        }
+    });
+
+    // Umożliwia logowanie enterem w polu input
+    accessCodeInput.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') {
+            loginButton.click();
+        }
+    });
+
+    // 2. Obsługa interakcji z polem do uploadu
+    uploadArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+    // Obsługa przeciągania i upuszczania plików (Drag & Drop)
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('drag-over');
+    });
+    uploadArea.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('drag-over');
+    });
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('drag-over');
+        handleFiles(e.dataTransfer.files);
+    });
+
+    // 3. Wysyłanie plików do backendu
+    async function handleFiles(files) {
+        if (files.length === 0) return;
+        
+        // Zablokuj upload-area na czas przesyłania
+        uploadArea.style.pointerEvents = 'none';
+        uploadArea.style.opacity = '0.5';
+
+        for (const file of files) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            console.log(`Wysyłanie pliku: ${file.name} do backendu...`);
+            try {
+                const response = await fetch(`${BACKEND_URL}/upload`, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`Błąd serwera: ${errorData.detail || response.statusText}`);
+                }
+                
+                const result = await response.json();
+                console.log(`Plik ${result.filename} przesłany pomyślnie!`);
+                // Dynamicznie dodaj plik do listy bez przeładowywania
+                addFileToList(result.filename); 
+            } catch (error) {
+                console.error(`Błąd podczas przesyłania ${file.name}:`, error);
+                alert(`Nie udało się przesłać pliku: ${file.name}\nBłąd: ${error.message}`);
+            }
+        }
+
+        // Odblokuj upload-area po zakończeniu
+        uploadArea.style.pointerEvents = 'auto';
+        uploadArea.style.opacity = '1';
+        fileInput.value = ''; // Wyczyść input na wypadek ponownego wyboru tego samego pliku
+    }
+
+    // 4. Ładowanie listy plików z backendu
+    async function loadFiles() {
+        fileList.innerHTML = '<li>Ładowanie listy plików...</li>';
+        try {
+            const response = await fetch(`${BACKEND_URL}/files`);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Błąd serwera: ${errorData.detail || response.statusText}`);
+            }
+            const data = await response.json();
+            
+            fileList.innerHTML = ''; // Wyczyść listę przed zapełnieniem
+            if (data.files.length === 0) {
+                fileList.innerHTML = '<li>Brak plików w magazynie.</li>';
+            } else {
+                data.files.forEach(fileName => addFileToList(fileName));
+            }
+        } catch (error) {
+            console.error("Błąd podczas ładowania listy plików:", error);
+            fileList.innerHTML = `<li>Nie udało się załadować plików. Błąd: ${error.message}</li>`;
+        }
+    }
+
+    // 5. Dodawanie pojedynczego pliku do listy w HTML
+    function addFileToList(fileName) {
+        // Usuń wiadomość "Brak plików...", jeśli istnieje
+        const placeholder = fileList.querySelector('li');
+        if (placeholder && placeholder.textContent.includes('Brak plików')) {
+            placeholder.remove();
+        }
+
+        const li = document.createElement('li');
+        const fileUrl = `https://huggingface.co/datasets/${REPO_ID_FOR_URL}/resolve/main/${encodeURIComponent(fileName)}`;
+        
+        const link = document.createElement('a');
+        link.href = fileUrl;
+        link.textContent = fileName;
+        link.target = "_blank"; // Otwórz w nowej karcie
+        link.rel = "noopener noreferrer"; // Dobre praktyki bezpieczeństwa
+
+        li.appendChild(link);
+        fileList.prepend(li); // Dodaj nowy plik na górze listy
+    }
+    </script>
+
+</body>
+</html>
