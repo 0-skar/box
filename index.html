@@ -1,0 +1,25 @@
+# app.py (w Hugging Face Space)
+from flask import Flask, request, jsonify
+from datasets import load_dataset, Dataset
+import os
+
+app = Flask(__name__)
+
+DATASET_NAME = "twoj_uzytkownik/nazwa_twojego_datasetu"
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'})
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'})
+
+    # Tutaj przetwórz plik i dodaj do datasetu
+    # ...
+
+    return jsonify({'message': 'File uploaded successfully'})
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
