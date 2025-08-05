@@ -4,317 +4,188 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Twoje Pliki</title>
-
-    <style>
-        /* ======================================================================= */
-        /* --- CSS --- */
-        /* ======================================================================= */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #ffffff;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start; /* Wyrównaj do góry */
-            min-height: 100vh;
-            color: #333;
-            box-sizing: border-box;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* Ekran logowania */
-        #login-screen {
-            text-align: center;
-            margin-top: 20vh;
-        }
-        .login-box input {
-            font-size: 1.5em;
-            padding: 10px;
-            width: 150px;
-            text-align: center;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            margin: 20px 0;
-            letter-spacing: 0.5em;
-        }
-        .login-box button {
-            font-size: 1em;
-            padding: 10px 20px;
-            cursor: pointer;
-            border: none;
-            background-color: #007bff;
-            color: white;
-            border-radius: 8px;
-            transition: background-color 0.2s;
-        }
-        .login-box button:hover {
-            background-color: #0056b3;
-        }
-        #error-message {
-            color: red;
-            margin-top: 10px;
-        }
-
-        /* Główny kontener aplikacji */
-        #app-container {
-            width: 100%;
-            max-width: 800px;
-            text-align: center;
-        }
-
-        /* Ramka do uploadu */
-        #upload-area {
-            border: 3px dashed #ccc;
-            border-radius: 15px;
-            padding: 40px;
-            margin-bottom: 30px;
-            cursor: pointer;
-            transition: background-color 0.2s, border-color 0.2s;
-        }
-        #upload-area:hover, #upload-area.drag-over {
-            background-color: #f8f9fa;
-            border-color: #007bff;
-        }
-        #upload-icon {
-            font-size: 50px;
-            color: #ccc;
-            transition: color 0.2s;
-        }
-        #upload-area:hover #upload-icon {
-            color: #007bff;
-        }
-
-        /* Lista plików */
-        #file-list-container {
-            text-align: left;
-        }
-        #file-list {
-            list-style: none;
-            padding: 0;
-        }
-        #file-list li {
-            background-color: #f1f1f1;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 1.1em;
-        }
-        #file-list a {
-            text-decoration: none;
-            color: #007bff;
-            font-weight: 500;
-        }
-        #file-list a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <style>/* Cały CSS pozostaje bez zmian - skopiuj go z poprzedniej wersji */ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; } .hidden { display: none !important; } #login-screen { text-align: center; margin-top: 20vh; } .login-box input { font-size: 1.5em; padding: 10px; width: 150px; text-align: center; border: 1px solid #ccc; border-radius: 8px; margin: 20px 0; } .login-box button { font-size: 1em; padding: 10px 20px; cursor: pointer; border: none; background-color: #007bff; color: white; border-radius: 8px; } #error-message { color: red; } #app-container { max-width: 1200px; margin: 0 auto; } #upload-area { border: 3px dashed #ccc; border-radius: 15px; padding: 40px; margin-bottom: 30px; cursor: pointer; text-align: center; background-color: #fff; } #upload-area:hover, #upload-area.drag-over { background-color: #f8f9fa; border-color: #007bff; } #upload-icon { font-size: 50px; color: #ccc; } #file-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 20px; padding: 20px; background-color: #fff; border-radius: 8px; } .file-item { position: relative; display: flex; flex-direction: column; align-items: center; padding: 10px; border-radius: 8px; cursor: pointer; transition: background-color 0.2s; } .file-item:hover { background-color: #e9ecef; } .file-icon { width: 70px; height: 70px; background-size: cover; background-position: center; background-repeat: no-repeat; margin-bottom: 10px; } .file-icon-img { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234B86F7"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M8,12H16V14H8V12M8,16H16V18H8V16Z" /></svg>'); } .file-icon-txt { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%236c757d"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM18 20H6V4h7v5h5v11zM8 15h8v2H8v-2zm0-4h8v2H8v-2z" /></svg>'); } .file-name { font-size: 14px; text-align: center; word-break: break-all; } .file-actions { position: absolute; top: 5px; right: 5px; display: none; } .file-item:hover .file-actions { display: flex; } .action-btn { border: none; background: rgba(255, 255, 255, 0.8); border-radius: 50%; width: 24px; height: 24px; cursor: pointer; margin-left: 5px; font-size: 16px; }</style>
 </head>
 <body>
-
-    <!-- ======================================================================= -->
-    <!-- --- HTML --- -->
-    <!-- ======================================================================= -->
-    
-    <!-- Ekran logowania -->
     <div id="login-screen">
-        <div class="login-box">
-            <h1>Wprowadź kod dostępu</h1>
-            <input type="password" id="access-code" placeholder="----" maxlength="4">
-            <button id="login-button">Wejdź</button>
-            <p id="error-message" class="hidden">Nieprawidłowy kod.</p>
-        </div>
+        <div class="login-box"><h1>Wprowadź kod dostępu</h1><input type="password" id="access-code" placeholder="----" maxlength="4"><button id="login-button">Wejdź</button><p id="error-message" class="hidden">Nieprawidłowy kod.</p></div>
     </div>
-
-    <!-- Główna aplikacja (początkowo ukryta) -->
     <div id="app-container" class="hidden">
-        <!-- Ramka do wrzucania plików -->
-        <div id="upload-area">
-            <div id="upload-icon">+</div>
-            <p>Upuść pliki tutaj lub kliknij, aby wybrać</p>
-            <input type="file" id="file-input" multiple hidden>
-        </div>
-
-        <!-- Lista wrzuconych plików -->
-        <div id="file-list-container">
-            <h2>Przechowywane pliki:</h2>
-            <ul id="file-list">
-                <!-- Pliki będą dodawane tutaj dynamicznie -->
-            </ul>
-        </div>
+        <div id="upload-area"><div id="upload-icon">+</div><p>Upuść pliki tutaj lub kliknij, aby wybrać</p><input type="file" id="file-input" multiple hidden></div>
+        <div id="file-list-container"></div>
     </div>
 
-
-    <script>
-    // =======================================================================
-    // --- JAVASCRIPT ---
-    // =======================================================================
-
-
-    // =======================================================================
+<script>
     // --- KONFIGURACJA ---
-    // Zastąp te wartości swoimi prawdziwymi danymi!
-    // =======================================================================
+    const BACKEND_URL = "https://TWOJA-NAZWA-SPACE.hf.space";
+    const REPO_ID_FOR_URL = "TWOJA_NAZWA_UZYTKOWNIKA/NAZWA_REPOZYTORIUM_DATASETU";
+    
+    // ZMIANA: Usuwamy stąd kod dostępu!
+    // const CORRECT_ACCESS_CODE = "2358";
+    
+    // ZMIANA: Zmienna do przechowywania naszego tokena sesji
+    let sessionToken = null;
 
-    // 1. Podaj pełny adres URL do Twojej aplikacji na Hugging Face Space.
-    //    Znajdziesz go w ustawieniach Space, np. "https://nazwa-uzytkownika-nazwa-space.hf.space"
-    const BACKEND_URL = "https://eosforus-box.hf.space";
-
-    // 2. Podaj identyfikator Twojego repozytorium Dataset.
-    //    Jest potrzebny tylko do tworzenia linków do pobierania plików.
-    //    Np. "TwojaNazwaUzytkownika/nazwa-datasetu"
-    const REPO_ID_FOR_URL = "Eosforus/box";
-
-    // 3. Kod dostępu, który wpisuje użytkownik.
-    const CORRECT_ACCESS_CODE = "2358";
-
-    // =======================================================================
-    // --- APLIKACJA ---
-    // Poniższego kodu nie musisz zmieniać.
-    // =======================================================================
-
-    // --- Elementy interfejsu (DOM) ---
+    // --- Elementy DOM (bez zmian) ---
     const loginScreen = document.getElementById('login-screen');
     const appContainer = document.getElementById('app-container');
     const accessCodeInput = document.getElementById('access-code');
     const loginButton = document.getElementById('login-button');
     const errorMessage = document.getElementById('error-message');
-
     const uploadArea = document.getElementById('upload-area');
     const fileInput = document.getElementById('file-input');
-    const fileList = document.getElementById('file-list');
+    const fileListContainer = document.getElementById('file-list-container');
 
-    // --- Logika aplikacji ---
+    // --- ZMIANA: Nowa logika logowania ---
+    loginButton.addEventListener('click', async () => {
+        errorMessage.classList.add('hidden');
+        try {
+            const response = await fetch(`${BACKEND_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: accessCodeInput.value })
+            });
 
-    // 1. Obsługa logowania
-    loginButton.addEventListener('click', () => {
-        if (accessCodeInput.value === CORRECT_ACCESS_CODE) {
-            errorMessage.classList.add('hidden');
+            if (!response.ok) {
+                throw new Error('Nieprawidłowy kod');
+            }
+            
+            const data = await response.json();
+            sessionToken = data.access_token; // Zapisujemy token
+            
+            // Jeśli logowanie się powiodło
             loginScreen.classList.add('hidden');
             appContainer.classList.remove('hidden');
-            loadFiles();
-        } else {
+            loadFiles(); // Ładujemy pliki dopiero po uzyskaniu tokena
+
+        } catch (error) {
             errorMessage.classList.remove('hidden');
-            accessCodeInput.value = "";
         }
     });
 
-    // Umożliwia logowanie enterem w polu input
-    accessCodeInput.addEventListener('keyup', (event) => {
-        if (event.key === 'Enter') {
-            loginButton.click();
+    // --- ZMIANA: Funkcja pomocnicza do tworzenia nagłówków autoryzacji ---
+    function getAuthHeaders() {
+        if (!sessionToken) throw new Error("Brak tokena sesji");
+        return {
+            'Authorization': `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json'
+        };
+    }
+    
+    // --- ZAKTUALIZOWANE FUNKCJE API ---
+    async function loadFiles() {
+        fileListContainer.innerHTML = '<p>Ładowanie plików...</p>';
+        try {
+            const headers = getAuthHeaders();
+            delete headers['Content-Type']; // GET nie potrzebuje Content-Type
+            const response = await fetch(`${BACKEND_URL}/files`, { headers });
+            const data = await response.json();
+            
+            fileListContainer.innerHTML = '';
+            if (data.files.length === 0) {
+                fileListContainer.innerHTML = '<p>Brak plików w magazynie.</p>';
+            } else {
+                data.files.forEach(addFileToGrid);
+            }
+        } catch (error) {
+            fileListContainer.innerHTML = `<p>Nie udało się załadować plików. Błąd: ${error.message}</p>`;
         }
-    });
+    }
 
-    // 2. Obsługa interakcji z polem do uploadu
-    uploadArea.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
-
-    // Obsługa przeciągania i upuszczania plików (Drag & Drop)
-    uploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadArea.classList.add('drag-over');
-    });
-    uploadArea.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove('drag-over');
-    });
-    uploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove('drag-over');
-        handleFiles(e.dataTransfer.files);
-    });
-
-    // 3. Wysyłanie plików do backendu
     async function handleFiles(files) {
-        if (files.length === 0) return;
-        
-        // Zablokuj upload-area na czas przesyłania
-        uploadArea.style.pointerEvents = 'none';
-        uploadArea.style.opacity = '0.5';
-
         for (const file of files) {
             const formData = new FormData();
             formData.append('file', file);
-
-            console.log(`Wysyłanie pliku: ${file.name} do backendu...`);
             try {
+                // Fetch dla FormData nie ustawia 'Content-Type', przeglądarka robi to sama
                 const response = await fetch(`${BACKEND_URL}/upload`, {
                     method: 'POST',
-                    body: formData,
+                    headers: { 'Authorization': `Bearer ${sessionToken}` },
+                    body: formData
                 });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(`Błąd serwera: ${errorData.detail || response.statusText}`);
-                }
-                
+                if (!response.ok) throw new Error('Błąd serwera');
                 const result = await response.json();
-                console.log(`Plik ${result.filename} przesłany pomyślnie!`);
-                // Dynamicznie dodaj plik do listy bez przeładowywania
-                addFileToList(result.filename); 
+                addFileToGrid(result.filename);
             } catch (error) {
-                console.error(`Błąd podczas przesyłania ${file.name}:`, error);
-                alert(`Nie udało się przesłać pliku: ${file.name}\nBłąd: ${error.message}`);
+                alert(`Nie udało się przesłać pliku: ${file.name}. Błąd: ${error.message}`);
             }
-        }
-
-        // Odblokuj upload-area po zakończeniu
-        uploadArea.style.pointerEvents = 'auto';
-        uploadArea.style.opacity = '1';
-        fileInput.value = ''; // Wyczyść input na wypadek ponownego wyboru tego samego pliku
-    }
-
-    // 4. Ładowanie listy plików z backendu
-    async function loadFiles() {
-        fileList.innerHTML = '<li>Ładowanie listy plików...</li>';
-        try {
-            const response = await fetch(`${BACKEND_URL}/files`);
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`Błąd serwera: ${errorData.detail || response.statusText}`);
-            }
-            const data = await response.json();
-            
-            fileList.innerHTML = ''; // Wyczyść listę przed zapełnieniem
-            if (data.files.length === 0) {
-                fileList.innerHTML = '<li>Brak plików w magazynie.</li>';
-            } else {
-                data.files.forEach(fileName => addFileToList(fileName));
-            }
-        } catch (error) {
-            console.error("Błąd podczas ładowania listy plików:", error);
-            fileList.innerHTML = `<li>Nie udało się załadować plików. Błąd: ${error.message}</li>`;
         }
     }
-
-    // 5. Dodawanie pojedynczego pliku do listy w HTML
-    function addFileToList(fileName) {
-        // Usuń wiadomość "Brak plików...", jeśli istnieje
-        const placeholder = fileList.querySelector('li');
-        if (placeholder && placeholder.textContent.includes('Brak plików')) {
-            placeholder.remove();
-        }
-
-        const li = document.createElement('li');
-        const fileUrl = `https://huggingface.co/datasets/${REPO_ID_FOR_URL}/resolve/main/${encodeURIComponent(fileName)}`;
+    
+    fileListContainer.addEventListener('click', async (e) => {
+        const target = e.target;
+        const fileItem = target.closest('.file-item');
+        if (!fileItem) return;
         
-        const link = document.createElement('a');
-        link.href = fileUrl;
-        link.textContent = fileName;
-        link.target = "_blank"; // Otwórz w nowej karcie
-        link.rel = "noopener noreferrer"; // Dobre praktyki bezpieczeństwa
+        const filename = fileItem.dataset.filename;
 
-        li.appendChild(link);
-        fileList.prepend(li); // Dodaj nowy plik na górze listy
+        if (target.matches('.delete-btn')) {
+            if (!confirm(`Czy na pewno chcesz usunąć plik "${filename}"?`)) return;
+            try {
+                const response = await fetch(`${BACKEND_URL}/delete`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ filename })
+                });
+                if (!response.ok) throw new Error('Błąd serwera');
+                fileItem.remove();
+            } catch (error) {
+                alert(`Nie udało się usunąć pliku. ${error.message}`);
+            }
+        }
+        
+        if (target.matches('.rename-btn')) {
+            const newFilename = prompt("Wprowadź nową nazwę dla pliku:", filename);
+            if (newFilename && newFilename !== filename) {
+                try {
+                    const response = await fetch(`${BACKEND_URL}/rename`, {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify({ old_filename: filename, new_filename: newFilename })
+                    });
+                    if (!response.ok) throw new Error('Błąd serwera');
+                    // Aktualizuj widok
+                    fileItem.dataset.filename = newFilename;
+                    fileItem.querySelector('.file-name').textContent = newFilename;
+                } catch (error) {
+                    alert(`Nie udało się zmienić nazwy. ${error.message}`);
+                }
+            }
+        }
+    });
+
+    // Funkcja addFileToGrid pozostaje bez zmian
+    function addFileToGrid(fileName) {
+        const placeholder = fileListContainer.querySelector('p');
+        if (placeholder) placeholder.remove();
+        const fileUrl = `https://huggingface.co/datasets/${REPO_ID_FOR_URL}/resolve/main/${encodeURIComponent(fileName)}`;
+        const fileExt = fileName.split('.').pop().toLowerCase();
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.dataset.filename = fileName;
+        const icon = document.createElement('div');
+        icon.className = 'file-icon';
+        if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(fileExt)) {
+            icon.style.backgroundImage = `url(${fileUrl}?token=${sessionToken})`; // Dodajemy token do URL obrazka
+        } else if (['txt', 'md', 'json', 'csv'].includes(fileExt)) {
+            icon.classList.add('file-icon-txt');
+        } else {
+            icon.classList.add('file-icon-img');
+        }
+        const name = document.createElement('span');
+        name.className = 'file-name';
+        name.textContent = fileName;
+        const actions = document.createElement('div');
+        actions.className = 'file-actions';
+        actions.innerHTML = `<button class="action-btn rename-btn" title="Zmień nazwę">✏️</button><button class="action-btn delete-btn" title="Usuń">🗑️</button>`;
+        fileItem.append(icon, name, actions);
+        fileItem.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('action-btn')) {
+                window.open(fileUrl, '_blank');
+            }
+        });
+        fileListContainer.prepend(fileItem);
     }
-    </script>
-
+</script>
 </body>
 </html>
