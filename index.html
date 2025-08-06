@@ -4,117 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Twoje Pliki</title>
-    <style>/* ... CSS bez zmian ... */ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background-color:#f0f2f5;margin:0;padding:20px}.hidden{display:none!important}#login-screen{text-align:center;margin-top:20vh}.login-box input{font-size:1.5em;padding:10px;width:150px;text-align:center;border:1px solid #ccc;border-radius:8px;margin:20px 0}.login-box button{font-size:1em;padding:10px 20px;cursor:pointer;border:none;background-color:#007bff;color:#fff;border-radius:8px}#error-message{color:red}#app-container{max-width:1200px;margin:0 auto}#upload-area{border:3px dashed #ccc;border-radius:15px;padding:40px;margin-bottom:30px;cursor:pointer;text-align:center;background-color:#fff}#upload-area:hover,#upload-area.drag-over{background-color:#f8f9fa;border-color:#007bff}#upload-icon{font-size:50px;color:#ccc}#file-list-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:20px;padding:20px;background-color:#fff;border-radius:8px}.file-item{position:relative;display:flex;flex-direction:column;align-items:center;padding:10px;border-radius:8px;cursor:pointer;transition:background-color .2s;-webkit-user-drag:element;}.file-item:hover{background-color:#e9ecef}.file-icon{width:70px;height:70px;background-size:cover;background-position:center;background-repeat:no-repeat;margin-bottom:10px;pointer-events:none;background-color:#e9ecef;}.file-icon-img{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234B86F7"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M8,12H16V14H8V12M8,16H16V18H8V16Z" /></svg>')}.file-icon-txt{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%236c757d"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM18 20H6V4h7v5h5v11zM8 15h8v2H8v-2zm0-4h8v2H8v-2z" /></svg>')}.file-name{font-size:14px;text-align:center;word-break:break-all;pointer-events:none;}.file-actions{position:absolute;top:5px;right:5px;display:none;background-color:rgba(240,242,245,0.7);border-radius:10px;padding:2px;}.file-item:hover .file-actions{display:flex}.action-btn{border:none;background:0 0;border-radius:50%;width:24px;height:24px;cursor:pointer;margin-left:5px;font-size:16px;line-height:24px;}
-        @media (hover: none) and (pointer: coarse), (max-width: 768px) { .file-actions { display: flex; position: static; margin-top: 10px; background-color: transparent; } .file-item:hover .file-actions { display: flex; } .file-item { padding-bottom: 5px; } }</style>
+    <style>
+        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background-color:#f0f2f5;margin:0;padding:20px}.hidden{display:none!important}#login-screen{text-align:center;margin-top:20vh}.login-box input{font-size:1.5em;padding:10px;width:150px;text-align:center;border:1px solid #ccc;border-radius:8px;margin:20px 0}.login-box button{font-size:1em;padding:10px 20px;cursor:pointer;border:none;background-color:#007bff;color:#fff;border-radius:8px}#error-message{color:red}#app-container{max-width:1200px;margin:0 auto}#upload-area{border:3px dashed #ccc;border-radius:15px;padding:40px;margin-bottom:30px;cursor:pointer;text-align:center;background-color:#fff}#upload-area:hover,#upload-area.drag-over{background-color:#f8f9fa;border-color:#007bff}#upload-icon{font-size:50px;color:#ccc}#file-list-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:20px;padding:20px;background-color:#fff;border-radius:8px}.file-item{position:relative;display:flex;flex-direction:column;align-items:center;padding:10px;border-radius:8px;cursor:pointer;transition:background-color .2s;-webkit-user-drag:element;}.file-item:hover{background-color:#e9ecef}.file-icon{width:70px;height:70px;background-size:cover;background-position:center;background-repeat:no-repeat;margin-bottom:10px;pointer-events:none;background-color:#e9ecef;}.file-icon-img{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234B86F7"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M8,12H16V14H8V12M8,16H16V18H8V16Z" /></svg>')}.file-icon-txt{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%236c757d"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM18 20H6V4h7v5h5v11zM8 15h8v2H8v-2zm0-4h8v2H8v-2z" /></svg>')}.file-name{font-size:14px;text-align:center;word-break:break-all;pointer-events:none;}.file-actions{position:absolute;top:5px;right:5px;display:none;background-color:rgba(240,242,245,0.7);border-radius:10px;padding:2px;}.file-item:hover .file-actions{display:flex}.action-btn{border:none;background:0 0;border-radius:50%;width:24px;height:24px;cursor:pointer;margin-left:5px;font-size:16px;line-height:24px;}
+        @media (hover: none) and (pointer: coarse), (max-width: 768px) { .file-actions { display: flex; position: static; margin-top: 10px; background-color: transparent; } .file-item:hover .file-actions { display: flex; } .file-item { padding-bottom: 5px; } }
+    </style>
 </head>
 <body>
-    <div id="login-screen"><!-- ... --></div>
-    <div id="app-container" class="hidden"><!-- ... --></div>
-    
+    <div id="login-screen">
+        <div class="login-box">
+            <h1>Wprowadź kod dostępu</h1>
+            <input type="password" id="access-code" placeholder="----" maxlength="4">
+            <button id="login-button">Wejdź</button>
+            <p id="error-message" class="hidden">Nieprawidłowy kod.</p>
+        </div>
+    </div>
+    <div id="app-container" class="hidden">
+        <div id="upload-area">
+            <div id="upload-icon">+</div>
+            <p>Upuść pliki tutaj lub kliknij, aby wybrać</p>
+            <input type="file" id="file-input" multiple hidden>
+        </div>
+        <div id="file-list-container"></div>
+    </div>
+
 <script>
+    // --- Konfiguracja ---
     const BACKEND_URL = "https://eosforus-box.hf.space";
-    // ZMIANA: REPO_ID_FOR_URL nie jest już potrzebne!
     let sessionToken = null;
 
-    // Kopiujemy cały JS z poprzedniej wersji, ale zmodyfikujemy kluczowe funkcje
-    // ...
-    // Cały HTML i JS jest taki sam jak poprzednio, ale modyfikujemy funkcje
-    // addFileToGrid, loadAndSetImagePreview i forceDownload
-
-    async function loadAndSetImagePreview(iconElement, fileUrl) {
-        try {
-            // ZMIANA: używamy naszego bezpiecznego URLa, nie bezpośredniego
-            const response = await fetch(fileUrl, { headers: { 'Authorization': `Bearer ${sessionToken}` } });
-            if (!response.ok) throw new Error('Błąd odpowiedzi serwera');
-            const blob = await response.blob();
-            const blobUrl = URL.createObjectURL(blob);
-            iconElement.style.backgroundImage = `url(${blobUrl})`;
-            // WAŻNE: Sprzątamy po sobie, aby uniknąć wycieków pamięci w przeglądarce
-            iconElement.addEventListener('load', () => URL.revokeObjectURL(blobUrl), { once: true });
-        } catch (error) {
-            console.error("Błąd ładowania podglądu:", error);
-        }
-    }
-
-    function addFileToGrid(fileName) {
-        // ZMIANA: URL pliku wskazuje teraz na nasz backend!
-        const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(fileName)}`;
-        const fileExt = fileName.split('.').pop().toLowerCase();
-        
-        const fileItem = document.createElement('div');
-        fileItem.className = 'file-item';
-        fileItem.dataset.filename = fileName;
-        fileItem.setAttribute('draggable', 'true');
-
-        const icon = document.createElement('div');
-        icon.className = 'file-icon';
-        
-        if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(fileExt)) {
-            loadAndSetImagePreview(icon, fileUrl); // Używamy nowej, bezpiecznej metody
-        } else {
-            icon.classList.add('file-icon-img');
-        }
-
-        const name = document.createElement('span');
-        name.className = 'file-name';
-        name.textContent = fileName;
-        
-        const actions = document.createElement('div');
-        actions.className = 'file-actions';
-        actions.innerHTML = `<button class="action-btn download-btn" title="Pobierz">⬇️</button><button class="action-btn rename-btn" title="Zmień nazwę">✏️</button><button class="action-btn delete-btn" title="Usuń">🗑️</button>`;
-        
-        fileItem.append(icon, name, actions);
-        
-        // ZMIANA: Drag & drop musi być obsłużony inaczej
-        fileItem.addEventListener('dragstart', async (e) => {
-            // To jest bardziej skomplikowane; na razie upraszczamy, skupiając się na kliknięciu
-            e.preventDefault(); 
-        });
-        
-        fileListContainer.prepend(fileItem);
-    }
-
-    fileListContainer.addEventListener('click', async (e) => {
-        const target = e.target;
-        const fileItem = target.closest('.file-item');
-        if (!fileItem) return;
-        
-        const filename = fileItem.dataset.filename;
-        // ZMIANA: URL jest budowany dynamicznie do naszego backendu
-        const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(filename)}`;
-
-        if (target.matches('.download-btn') || !target.closest('.file-actions')) {
-            // ZMIANA: Nie musimy już używać forceDownload, bo backend robi to za nas.
-            // Wystarczy otworzyć link, przeglądarka sama obsłuży pobieranie.
-            // To jest hack, tworzymy niewidoczny link i go klikamy.
-            const a = document.createElement('a');
-            a.href = fileUrl;
-            a.download = filename; // Ten atrybut mówi przeglądarce, żeby pobrała plik
-            
-            // WAŻNE: Musimy dołączyć nasz token do linku, aby go autoryzować
-            // Robimy to przez "query parameter", bo w linku <a> nie można ustawić nagłówka
-            // Backend musi zostać zmodyfikowany, aby to obsłużyć!
-            // --> Czekaj, to zły pomysł, bo token będzie widoczny w URL.
-            // Zostajemy przy forceDownload, to najlepsza opcja.
-            forceDownload(fileUrl, filename);
-            return;
-        }
-
-        // Reszta bez zmian
-        if (target.matches('.delete-btn')) { /* ... */ }
-        if (target.matches('.rename-btn')) { /* ... */ }
-    });
-
-    // Wklejamy tutaj CAŁY KOD JS z poprzedniej wersji, aby mieć pewność, że wszystko jest kompletne
-</script>
-<div id="full-script-placeholder"></div>
-<script>
-    // Zastąp całą zawartość tego taga <script> poniższym kodem
-
-    // Konfiguracja
+    // --- Pobranie elementów DOM (robimy to raz, na początku) ---
     const loginScreen = document.getElementById('login-screen');
     const appContainer = document.getElementById('app-container');
-    appContainer.innerHTML = `<div id="upload-area"><div id="upload-icon">+</div><p>Upuść pliki tutaj lub kliknij, aby wybrać</p><input type="file" id="file-input" multiple hidden></div><div id="file-list-container"></div>`; // Ponowne wstawienie, bo placeholder mógł usunąć
     const accessCodeInput = document.getElementById('access-code');
     const loginButton = document.getElementById('login-button');
     const errorMessage = document.getElementById('error-message');
@@ -122,39 +42,17 @@
     const fileInput = document.getElementById('file-input');
     const fileListContainer = document.getElementById('file-list-container');
 
+    // --- Definicje Funkcji ---
 
-    // Logika Logowania
-    loginButton.addEventListener('click', async () => {
-        errorMessage.classList.add('hidden');
-        try {
-            const response = await fetch(`${BACKEND_URL}/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code: accessCodeInput.value })
-            });
-            if (!response.ok) throw new Error('Nieprawidłowy kod');
-            const data = await response.json();
-            sessionToken = data.access_token;
-            loginScreen.classList.add('hidden');
-            appContainer.classList.remove('hidden');
-            loadFiles();
-        } catch (error) {
-            errorMessage.classList.remove('hidden');
-        }
-    });
-    accessCodeInput.addEventListener('keyup', e => { if (e.key === 'Enter') loginButton.click() });
-
-
-    // Funkcje pomocnicze
     function getAuthHeaders() {
         if (!sessionToken) throw new Error("Brak tokena sesji");
-        return { 'Authorization': `Bearer ${sessionToken}`, 'Content-Type': 'application/json' };
+        return { 'Authorization': `Bearer ${sessionToken}` };
     }
-    
+
     async function forceDownload(url, filename) {
         try {
-            const response = await fetch(url, { headers: { 'Authorization': `Bearer ${sessionToken}` } });
-            if (!response.ok) throw new Error('Pobieranie pliku nie powiodło się');
+            const response = await fetch(url, { headers: getAuthHeaders() });
+            if (!response.ok) throw new Error(`Błąd serwera: ${response.statusText}`);
             const blob = await response.blob();
             const blobUrl = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -170,31 +68,64 @@
             alert("Nie udało się pobrać pliku.");
         }
     }
+    
+    async function loadAndSetImagePreview(iconElement, imageUrl) {
+        try {
+            const response = await fetch(imageUrl, { headers: getAuthHeaders() });
+            if (!response.ok) throw new Error('Nie udało się załadować podglądu');
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            iconElement.style.backgroundImage = `url(${blobUrl})`;
+            // Nie musimy sprzątać, przeglądarka zrobi to sama po odświeżeniu
+        } catch (error) {
+            console.error("Błąd ładowania podglądu:", error);
+        }
+    }
+    
+    function addFileToGrid(fileName) {
+        const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(fileName)}`;
+        const fileExt = fileName.split('.').pop().toLowerCase();
+        
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.dataset.filename = fileName;
+        fileItem.setAttribute('draggable', 'true');
 
-    // Funkcje API
+        const icon = document.createElement('div');
+        icon.className = 'file-icon';
+        
+        if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(fileExt)) {
+            icon.classList.add('file-icon-img'); // Domyślna ikona na czas ładowania
+            loadAndSetImagePreview(icon, fileUrl);
+        } else {
+            icon.classList.add('file-icon-img');
+        }
+
+        const name = document.createElement('span');
+        name.className = 'file-name';
+        name.textContent = fileName;
+        
+        const actions = document.createElement('div');
+        actions.className = 'file-actions';
+        actions.innerHTML = `<button class="action-btn download-btn" title="Pobierz">⬇️</button><button class="action-btn rename-btn" title="Zmień nazwę">✏️</button><button class="action-btn delete-btn" title="Usuń">🗑️</button>`;
+        
+        fileItem.append(icon, name, actions);
+        fileListContainer.prepend(fileItem);
+    }
+    
     async function loadFiles() {
         fileListContainer.innerHTML = '<p>Ładowanie plików...</p>';
         try {
-            const headers = getAuthHeaders();
-            delete headers['Content-Type'];
-            const response = await fetch(`${BACKEND_URL}/files`, { headers });
+            const response = await fetch(`${BACKEND_URL}/files`, { headers: getAuthHeaders() });
             if (!response.ok) throw new Error("Błąd autoryzacji lub serwera");
             const data = await response.json();
             fileListContainer.innerHTML = '';
-            if (data.files.length === 0) {
-                 fileListContainer.innerHTML = '<p>Brak plików w magazynie.</p>';
-            } else {
-                data.files.forEach(addFileToGrid);
-            }
+            data.files.forEach(addFileToGrid);
         } catch (error) {
             fileListContainer.innerHTML = `<p>Nie udało się załadować plików. ${error.message}</p>`;
         }
     }
-    uploadArea.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', e => handleFiles(e.target.files));
-    uploadArea.addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add('drag-over'); });
-    uploadArea.addEventListener('dragleave', e => { e.preventDefault(); e.currentTarget.classList.remove('drag-over'); });
-    uploadArea.addEventListener('drop', e => { e.preventDefault(); e.currentTarget.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
+    
     async function handleFiles(files) {
         for (const file of files) {
             const formData = new FormData();
@@ -214,7 +145,31 @@
         }
     }
 
-    // Główny listener zdarzeń
+    // --- Dodanie "nasłuchiwaczy zdarzeń" (robimy to raz, na końcu) ---
+
+    loginButton.addEventListener('click', async () => {
+        errorMessage.classList.add('hidden');
+        try {
+            const response = await fetch(`${BACKEND_URL}/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: accessCodeInput.value }) });
+            if (!response.ok) throw new Error('Nieprawidłowy kod');
+            const data = await response.json();
+            sessionToken = data.access_token;
+            loginScreen.classList.add('hidden');
+            appContainer.classList.remove('hidden');
+            loadFiles();
+        } catch (error) {
+            errorMessage.classList.remove('hidden');
+        }
+    });
+
+    accessCodeInput.addEventListener('keyup', e => { if (e.key === 'Enter') loginButton.click() });
+    
+    uploadArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', e => handleFiles(e.target.files));
+    uploadArea.addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add('drag-over'); });
+    uploadArea.addEventListener('dragleave', e => { e.preventDefault(); e.currentTarget.classList.remove('drag-over'); });
+    uploadArea.addEventListener('drop', e => { e.preventDefault(); e.currentTarget.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
+
     fileListContainer.addEventListener('click', async (e) => {
         const target = e.target;
         const fileItem = target.closest('.file-item');
@@ -231,7 +186,7 @@
         if (target.matches('.delete-btn')) {
             if (!confirm(`Czy na pewno chcesz usunąć plik "${filename}"?`)) return;
             try {
-                const response = await fetch(`${BACKEND_URL}/delete`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ filename }) });
+                const response = await fetch(`${BACKEND_URL}/delete`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json'}, body: JSON.stringify({ filename }) });
                 if (!response.ok) throw new Error('Błąd serwera');
                 fileItem.remove();
             } catch (error) {
@@ -243,7 +198,7 @@
             const newFilename = prompt("Wprowadź nową nazwę dla pliku:", filename);
             if (newFilename && newFilename !== filename) {
                 try {
-                    const response = await fetch(`${BACKEND_URL}/rename`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ old_filename: filename, new_filename: newFilename }) });
+                    const response = await fetch(`${BACKEND_URL}/rename`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json'}, body: JSON.stringify({ old_filename: filename, new_filename: newFilename }) });
                     if (!response.ok) throw new Error('Błąd serwera');
                     fileItem.dataset.filename = newFilename;
                     fileItem.querySelector('.file-name').textContent = newFilename;
@@ -255,8 +210,6 @@
             }
         }
     });
-
-    document.querySelector("#full-script-placeholder").remove();
 </script>
 </body>
 </html>
