@@ -13,14 +13,19 @@
         #modal-filename{font-weight:700}
         #modal-close-btn{font-size:24px;cursor:pointer;border:none;background:0 0}
         #modal-content{padding:15px;overflow:auto;flex-grow:1;display:flex;align-items:center;justify-content:center}
-        #modal-content pre{margin:0;white-space:pre-wrap;word-wrap:break-word;width:100%}
+        #modal-content pre{display:none;margin:0;white-space:pre-wrap;word-wrap:break-word;width:100%}
         #modal-content img{display:none;max-width:100%;max-height:100%;object-fit:contain}
         #context-menu{position:fixed;z-index:10000;width:180px;background-color:#fff;border-radius:8px;box-shadow:0 5px 15px rgba(0,0,0,.2);padding:5px 0}.context-menu-item{padding:8px 15px;cursor:pointer}.context-menu-item:hover{background-color:#f0f2f5}
     </style>
 </head>
 <body>
-    <div id="login-screen"><!-- HTML bez zmian --></div>
-    <div id="app-container" class="hidden"><!-- HTML bez zmian --></div>
+    <div id="login-screen">
+        <div class="login-box"><h1>Wprowadź kod dostępu</h1><input type="password" id="access-code" placeholder="----" maxlength="4"><button id="login-button">Wejdź</button><p id="error-message" class="hidden">Nieprawidłowy kod.</p></div>
+    </div>
+    <div id="app-container" class="hidden">
+        <div id="upload-area"><div id="upload-icon">+</div><p>Upuść pliki tutaj lub kliknij, aby wybrać</p><input type="file" id="file-input" multiple hidden></div>
+        <div id="file-list-container"></div>
+    </div>
     <div id="modal-overlay" class="hidden">
         <div id="modal-viewer">
             <div id="modal-header"><span id="modal-filename"></span><button id="modal-close-btn" title="Zamknij">&times;</button></div>
@@ -30,68 +35,107 @@
             </div>
         </div>
     </div>
-    <div id="context-menu" class="hidden"><!-- HTML bez zmian --></div>
+    <div id="context-menu" class="hidden">
+        <div class="context-menu-item" id="new-folder-btn">Nowy folder</div>
+    </div>
 
 <script>
     // --- Konfiguracja i Zmienne Globalne ---
     const BACKEND_URL = "https://eosforus-box.hf.space";
     const PUBLIC_DATASET_URL = "https://huggingface.co/datasets/Eosforus/box/resolve/main/";
     const TEXT_FILE_EXTENSIONS = ['txt', 'md', 'json', 'js', 'py', 'css', 'html', 'log'];
-    const IMAGE_FILE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
+    const IMAGE_FILE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'];
     let sessionToken = null;
 
     // --- Pobranie Elementów DOM ---
-    const dom = { /* ... bez zmian ... */ };
-    Object.assign(dom, {
-        loginScreen: document.getElementById('login-screen'), appContainer: document.getElementById('app-container'),
-        accessCodeInput: document.getElementById('access-code'), loginButton: document.getElementById('login-button'),
-        errorMessage: document.getElementById('error-message'), uploadArea: document.getElementById('upload-area'),
-        fileInput: document.getElementById('file-input'), fileListContainer: document.getElementById('file-list-container'),
-        modalOverlay: document.getElementById('modal-overlay'), modalFilename: document.getElementById('modal-filename'),
-        modalContent: document.querySelector('#modal-content pre code'), modalImage: document.getElementById('modal-image'),
-        modalCloseBtn: document.getElementById('modal-close-btn'), contextMenu: document.getElementById('context-menu'),
+    const dom = {
+        loginScreen: document.getElementById('login-screen'),
+        appContainer: document.getElementById('app-container'),
+        accessCodeInput: document.getElementById('access-code'),
+        loginButton: document.getElementById('login-button'),
+        errorMessage: document.getElementById('error-message'),
+        uploadArea: document.getElementById('upload-area'),
+        fileInput: document.getElementById('file-input'),
+        fileListContainer: document.getElementById('file-list-container'),
+        modalOverlay: document.getElementById('modal-overlay'),
+        modalFilename: document.getElementById('modal-filename'),
+        modalContentText: document.querySelector('#modal-content pre'),
+        modalContentCode: document.querySelector('#modal-content pre code'),
+        modalImage: document.getElementById('modal-image'),
+        modalCloseBtn: document.getElementById('modal-close-btn'),
+        contextMenu: document.getElementById('context-menu'),
         newFolderBtn: document.getElementById('new-folder-btn')
-    });
-    
-    // --- Funkcje Pomocnicze ---
-    function getAuthHeaders() { /* ... bez zmian ... */ }
-    async function forceDownload(url, filename) { /* ... bez zmian ... */ }
-    async function loadAndSetImagePreview(iconElement, imageUrl) { /* ... bez zmian ... */ }
+    };
 
+    // --- Funkcje Pomocnicze ---
+    function getAuthHeaders() {
+        if (!sessionToken) throw new Error("Brak tokena sesji");
+        return { 'Authorization': `Bearer ${sessionToken}` };
+    }
+
+    async function forceDownload(url, filename) {
+        try {
+            const response = await fetch(url, { headers: getAuthHeaders() });
+            if (!response.ok) throw new Error(`Błąd serwera: ${response.statusText}`);
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none'; a.href = blobUrl; a.download = filename;
+            document.body.appendChild(a); a.click();
+            window.URL.revokeObjectURL(blobUrl); a.remove();
+        } catch (error) {
+            console.error("Błąd pobierania:", error); alert("Nie udało się pobrać pliku.");
+        }
+    }
+
+    async function loadAndSetImagePreview(iconElement, imageUrl) {
+        try {
+            const response = await fetch(imageUrl, { headers: getAuthHeaders() });
+            if (!response.ok) throw new Error('Nie udało się załadować podglądu');
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            iconElement.style.backgroundImage = `url(${blobUrl})`;
+        } catch (error) {
+            console.error("Błąd ładowania podglądu:", error);
+        }
+    }
+    
     async function showModal(filename, type) {
         dom.modalFilename.textContent = filename;
-        dom.modalOverlay.classList.remove('hidden');
-        
         const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(filename)}`;
         
+        // Resetuj widok modala
+        dom.modalImage.style.display = 'none';
+        dom.modalContentText.style.display = 'none';
+        dom.modalOverlay.classList.remove('hidden');
+
         if (type === 'image') {
             dom.modalImage.style.display = 'block';
-            dom.modalContent.style.display = 'none';
-            dom.modalImage.src = ''; // Wyczyść stary obrazek
+            dom.modalImage.src = '';
             try {
                 const response = await fetch(fileUrl, { headers: getAuthHeaders() });
                 if (!response.ok) throw new Error('Nie udało się załadować obrazu');
                 const blob = await response.blob();
                 const blobUrl = URL.createObjectURL(blob);
                 dom.modalImage.src = blobUrl;
+                dom.modalImage.onload = () => URL.revokeObjectURL(blobUrl); // Sprzątanie po załadowaniu
             } catch (error) {
                 alert(error.message);
             }
         } else { // type === 'text'
-            dom.modalImage.style.display = 'none';
-            dom.modalContent.style.display = 'block';
-            dom.modalContent.textContent = 'Ładowanie...';
+            dom.modalContentText.style.display = 'block';
+            dom.modalContentCode.textContent = 'Ładowanie...';
             try {
                 const response = await fetch(fileUrl, { headers: getAuthHeaders() });
                 if (!response.ok) throw new Error('Nie udało się pobrać zawartości');
                 const textContent = await response.text();
-                dom.modalContent.textContent = textContent;
+                dom.modalContentCode.textContent = textContent;
             } catch (error) {
-                dom.modalContent.textContent = `Błąd: ${error.message}`;
+                dom.modalContentCode.textContent = `Błąd: ${error.message}`;
             }
         }
     }
-    
+
     // --- Główna Logika Aplikacji ---
     function addItemToGrid({ name, type }) {
         const fileItem = document.createElement('div');
@@ -133,17 +177,51 @@
         dom.fileListContainer.appendChild(fileItem);
     }
     
-    async function loadFiles() { /* ... bez zmian ... */ }
-    async function handleFiles(files) { /* ... bez zmian ... */ }
+    async function loadFiles() {
+        dom.fileListContainer.innerHTML = "<p>Ładowanie...</p>";
+        try {
+            const response = await fetch(`${BACKEND_URL}/files`, { headers: getAuthHeaders() });
+            if (!response.ok) throw new Error("Błąd autoryzacji lub serwera");
+            const data = await response.json();
+            dom.fileListContainer.innerHTML = "";
+            if (data.files && data.files.length) {
+                const folders = new Set();
+                const files = [];
+                data.files.forEach(path => path.includes('/') ? folders.add(path.split('/')[0]) : files.push(path));
+                [...folders].sort().forEach(name => addItemToGrid({ name, type: 'folder' }));
+                files.sort().forEach(name => addItemToGrid({ name, type: 'file' }));
+            }
+        } catch (error) {
+            dom.fileListContainer.innerHTML = `<p>Nie udało się załadować plików. ${error.message}</p>`;
+        }
+    }
+    
+    async function handleFiles(files) {
+        for (const file of files) {
+            const formData = new FormData();
+            formData.append('file', file);
+            try {
+                const response = await fetch(`${BACKEND_URL}/upload`, { method: "POST", headers: { 'Authorization': `Bearer ${sessionToken}` }, body: formData });
+                if (!response.ok) throw new Error("Błąd serwera");
+                const result = await response.json();
+                addItemToGrid({ name: result.filename, type: 'file' });
+            } catch (error) {
+                alert(`Nie udało się przesłać pliku: ${file.name}.`);
+            }
+        }
+    }
 
     async function createNewFolder() {
         const folderName = prompt("Wprowadź nazwę nowego folderu:");
         if (folderName && folderName.trim()) {
             try {
                 const response = await fetch(`${BACKEND_URL}/create-folder`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ folder_name: folderName.trim() }) });
-                if (!response.ok) throw new Error('Nie udało się utworzyć folderu.');
-                // NAPRAWIONO: Natychmiastowe dodanie do widoku
-                addItemToGrid({ name: folderName.trim(), type: 'folder' });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Nie udało się utworzyć folderu.');
+                }
+                const result = await response.json();
+                addItemToGrid({ name: result.folder_name, type: 'folder' });
             } catch (error) {
                 alert(error.message);
             }
@@ -151,32 +229,54 @@
     }
 
     // --- "Nasłuchiwacze Zdarzeń" ---
+
+    dom.loginButton.addEventListener('click', async () => {
+        dom.errorMessage.classList.add("hidden");
+        try {
+            const response = await fetch(`${BACKEND_URL}/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: dom.accessCodeInput.value }) });
+            if (!response.ok) throw new Error("Nieprawidłowy kod");
+            const data = await response.json();
+            sessionToken = data.access_token;
+            dom.loginScreen.classList.add("hidden");
+            dom.appContainer.classList.remove("hidden");
+            loadFiles();
+        } catch (error) {
+            dom.errorMessage.classList.remove("hidden");
+        }
+    });
+
+    dom.accessCodeInput.addEventListener('keyup', e => { if (e.key === 'Enter') dom.loginButton.click() });
     
-    dom.loginButton.addEventListener('click', async () => { /* ... bez zmian ... */ });
-    dom.accessCodeInput.addEventListener('keyup', e => { /* ... bez zmian ... */ });
     dom.uploadArea.addEventListener('click', () => dom.fileInput.click());
     dom.fileInput.addEventListener('change', e => handleFiles(e.target.files));
-    dom.uploadArea.addEventListener('dragover', e => { /* ... bez zmian ... */ });
-    dom.uploadArea.addEventListener('dragleave', e => { /* ... bez zmian ... */ });
-    dom.uploadArea.addEventListener('drop', e => { /* ... bez zmian ... */ });
+    dom.uploadArea.addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add("drag-over"); });
+    dom.uploadArea.addEventListener('dragleave', e => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); });
+    dom.uploadArea.addEventListener('drop', e => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); handleFiles(e.dataTransfer.files); });
 
-    dom.modalCloseBtn.addEventListener('click', () => {
-        dom.modalOverlay.classList.add('hidden');
-        // Zatrzymujemy ładowanie i czyścimy src, aby zwolnić pamięć
-        dom.modalImage.src = ''; 
-    });
+    dom.modalCloseBtn.addEventListener('click', () => { dom.modalOverlay.classList.add('hidden'); dom.modalImage.src = ''; });
     dom.modalOverlay.addEventListener('click', (e) => { if (e.target === dom.modalOverlay) dom.modalCloseBtn.click(); });
 
     dom.newFolderBtn.addEventListener('click', createNewFolder);
-    dom.appContainer.addEventListener('contextmenu', e => { /* ... bez zmian ... */ });
+    dom.appContainer.addEventListener('contextmenu', e => {
+        e.preventDefault();
+        dom.contextMenu.style.top = `${e.clientY}px`; dom.contextMenu.style.left = `${e.clientX}px`;
+        dom.contextMenu.classList.remove('hidden');
+    });
     let longPressTimer;
-    dom.appContainer.addEventListener('touchstart', e => { /* ... bez zmian ... */ });
+    dom.appContainer.addEventListener('touchstart', e => { longPressTimer = setTimeout(() => { e.preventDefault(); const touch = e.touches[0]; dom.contextMenu.style.top = `${touch.clientY}px`; dom.contextMenu.style.left = `${touch.clientX}px`; dom.contextMenu.classList.remove('hidden'); }, 500); });
     dom.appContainer.addEventListener('touchend', () => clearTimeout(longPressTimer));
     dom.appContainer.addEventListener('touchmove', () => clearTimeout(longPressTimer));
     document.addEventListener('click', () => dom.contextMenu.classList.add('hidden'));
 
-    dom.fileListContainer.addEventListener('dragstart', (e) => { /* ... bez zmian ... */ });
-    
+    dom.fileListContainer.addEventListener('dragstart', (e) => {
+        const fileItem = e.target.closest('.file-item');
+        if (fileItem && fileItem.dataset.type === 'file') {
+            const fileName = fileItem.dataset.filename;
+            const publicFileUrl = `${PUBLIC_DATASET_URL}${encodeURIComponent(fileName)}`;
+            e.dataTransfer.setData('DownloadURL', `application/octet-stream:${fileName}:${publicFileUrl}`);
+        }
+    });
+
     dom.fileListContainer.addEventListener('click', async (e) => {
         const target = e.target;
         const fileItem = target.closest('.file-item');
@@ -185,7 +285,7 @@
         const filename = fileItem.dataset.filename;
         const type = fileItem.dataset.type;
 
-        if (type === 'folder') { return; } // Na razie nic nie robimy z folderami
+        if (type === 'folder') { return; }
 
         const fileExt = filename.split('.').pop().toLowerCase();
         const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(filename)}`;
@@ -197,32 +297,42 @@
 
         if (!target.closest('.file-actions')) {
             if (IMAGE_FILE_EXTENSIONS.includes(fileExt)) {
-                showModal(filename, 'image'); // Pokaż podgląd obrazu
+                showModal(filename, 'image');
             } else if (TEXT_FILE_EXTENSIONS.includes(fileExt)) {
-                showModal(filename, 'text'); // Pokaż podgląd tekstu
+                showModal(filename, 'text');
             } else {
-                forceDownload(fileUrl, filename); // Pobierz inne pliki (np. PDF)
+                forceDownload(fileUrl, filename);
             }
             return;
         }
         
-        if (target.matches('.delete-btn')) { /* ... bez zmian ... */ }
-        if (target.matches('.rename-btn')) { /* ... bez zmian ... */ }
+        if (target.matches('.delete-btn')) {
+            if (!confirm(`Czy na pewno chcesz usunąć plik "${filename}"?`)) return;
+            try {
+                const response = await fetch(`${BACKEND_URL}/delete`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ filename }) });
+                if (!response.ok) throw new Error('Błąd serwera');
+                fileItem.remove();
+            } catch (error) {
+                alert(`Nie udało się usunąć pliku.`);
+            }
+        }
+        
+        if (target.matches('.rename-btn')) {
+            const newFilename = prompt("Wprowadź nową nazwę dla pliku:", filename);
+            if (newFilename && newFilename !== filename) {
+                try {
+                    const response = await fetch(`${BACKEND_URL}/rename`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ old_filename: filename, new_filename: newFilename }) });
+                    if (!response.ok) throw new Error("Błąd serwera");
+                    fileItem.dataset.filename = newFilename;
+                    fileItem.querySelector('.file-name').textContent = newFilename;
+                    const icon = fileItem.querySelector('.file-icon');
+                    loadAndSetImagePreview(icon, `${BACKEND_URL}/download/${encodeURIComponent(newFilename)}`);
+                } catch (error) {
+                    alert("Nie udało się zmienić nazwy.");
+                }
+            }
+        }
     });
-
-    // Uzupełnienie reszty funkcji dla kompletności
-    function getAuthHeaders(){if(!sessionToken)throw new Error("Brak tokena sesji");return{'Authorization':`Bearer ${sessionToken}`}}
-    async function forceDownload(e,t){try{const n=await fetch(e,{headers:getAuthHeaders()});if(!n.ok)throw new Error(`Błąd serwera: ${n.statusText}`);const o=await n.blob(),a=window.URL.createObjectURL(o),d=document.createElement("a");d.style.display="none",d.href=a,d.download=t,document.body.appendChild(d),d.click(),window.URL.revokeObjectURL(a),d.remove()}catch(e){console.error("Błąd pobierania:",e),alert("Nie udało się pobrać pliku.")}}
-    async function loadAndSetImagePreview(e,t){try{const n=await fetch(t,{headers:getAuthHeaders()});if(!n.ok)throw new Error("Nie udało się załadować podglądu");const o=await n.blob(),a=URL.createObjectURL(o);e.style.backgroundImage=`url(${a}`)}catch(e){console.error("Błąd ładowania podglądu:",e)}}
-    async function loadFiles(){dom.fileListContainer.innerHTML="<p>Ładowanie...</p>";try{const e=await fetch(`${BACKEND_URL}/files`,{headers:getAuthHeaders()});if(!e.ok)throw new Error("Błąd autoryzacji lub serwera");const t=await e.json();dom.fileListContainer.innerHTML="";const n=new Set,o=[];t.files&&t.files.length&&(t.files.forEach(e=>{e.includes("/")?n.add(e.split("/")[0]):o.push(e)}),[...n].sort().forEach(e=>addItemToGrid({name:e,type:"folder"})),o.sort().forEach(e=>addItemToGrid({name:e,type:"file"})))}catch(e){dom.fileListContainer.innerHTML=`<p>Nie udało się załadować plików. ${e.message}</p>`}}
-    async function handleFiles(e){for(const t of e){const n=new FormData;n.append("file",t);try{const e=await fetch(`${BACKEND_URL}/upload`,{method:"POST",headers:{'Authorization':`Bearer ${sessionToken}`},body:n});if(!e.ok)throw new Error("Błąd serwera");const o=await e.json();addItemToGrid({name:o.filename,type:"file"})}catch(e){alert(`Nie udało się przesłać pliku: ${t.name}.`)}}}
-    dom.loginButton.addEventListener("click",async()=>{dom.errorMessage.classList.add("hidden");try{const e=await fetch(`${BACKEND_URL}/login`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:dom.accessCodeInput.value})});if(!e.ok)throw new Error("Nieprawidłowy kod");const t=await e.json();sessionToken=t.access_token,dom.loginScreen.classList.add("hidden"),dom.appContainer.classList.remove("hidden"),loadFiles()}catch(e){dom.errorMessage.classList.remove("hidden")}});
-    dom.accessCodeInput.addEventListener("keyup",e=>{if("Enter"===e.key)dom.loginButton.click()});
-    dom.uploadArea.addEventListener("click",()=>dom.fileInput.click()),dom.fileInput.addEventListener("change",e=>handleFiles(e.target.files)),dom.uploadArea.addEventListener("dragover",e=>{e.preventDefault(),e.currentTarget.classList.add("drag-over")}),dom.uploadArea.addEventListener("dragleave",e=>{e.preventDefault(),e.currentTarget.classList.remove("drag-over")}),dom.uploadArea.addEventListener("drop",e=>{e.preventDefault(),e.currentTarget.classList.remove("drag-over"),handleFiles(e.dataTransfer.files)});
-    dom.newFolderBtn.addEventListener("click",createNewFolder),dom.appContainer.addEventListener("contextmenu",e=>{e.preventDefault(),dom.contextMenu.style.top=`${e.clientY}px`,dom.contextMenu.style.left=`${e.clientX}px`,dom.contextMenu.classList.remove("hidden")});
-    dom.appContainer.addEventListener("touchstart",e=>{longPressTimer=setTimeout(()=>{e.preventDefault();const t=e.touches[0];dom.contextMenu.style.top=`${t.clientY}px`,dom.contextMenu.style.left=`${t.clientX}px`,dom.contextMenu.classList.remove("hidden")},500)}),dom.appContainer.addEventListener("touchend",()=>clearTimeout(longPressTimer)),dom.appContainer.addEventListener("touchmove",()=>clearTimeout(longPressTimer)),document.addEventListener("click",()=>dom.contextMenu.classList.add("hidden"));
-    dom.fileListContainer.addEventListener("dragstart",e=>{const t=e.target.closest(".file-item");if(t&&"file"===t.dataset.type){const n=t.dataset.filename,o=`${PUBLIC_DATASET_URL}${encodeURIComponent(n)}`;e.dataTransfer.setData("DownloadURL",`application/octet-stream:${n}:${o}`)}});
-    dom.fileListContainer.addEventListener('click', async (e) => { const target = e.target; const fileItem = target.closest('.file-item'); if (!fileItem) return; const filename = fileItem.dataset.filename; const type = fileItem.dataset.type; if (type === 'folder') return; const fileExt = filename.split('.').pop().toLowerCase(); const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(filename)}`; if (target.matches('.download-btn')) { forceDownload(fileUrl, filename); return; } if (!target.closest('.file-actions')) { if (IMAGE_FILE_EXTENSIONS.includes(fileExt)) { showModal(filename, 'image'); } else if (TEXT_FILE_EXTENSIONS.includes(fileExt)) { showModal(filename, 'text'); } else { forceDownload(fileUrl, filename); } return; } if (target.matches('.delete-btn')) { if (!confirm(`Czy na pewno chcesz usunąć plik "${filename}"?`)) return; try { const response = await fetch(`${BACKEND_URL}/delete`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ filename }) }); if (!response.ok) throw new Error('Błąd serwera'); fileItem.remove(); } catch (error) { alert(`Nie udało się usunąć pliku.`); } } if (target.matches('.rename-btn')) { const newFilename = prompt("Wprowadź nową nazwę dla pliku:", filename); if (newFilename && newFilename !== filename) { try { const response = await fetch(`${BACKEND_URL}/rename`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ old_filename: filename, new_filename: newFilename }) }); if (!response.ok) throw new Error("Błąd serwera"); fileItem.dataset.filename = newFilename; fileItem.querySelector('.file-name').textContent = newFilename; const icon = fileItem.querySelector('.file-icon'); loadAndSetImagePreview(icon, `${BACKEND_URL}/download/${encodeURIComponent(newFilename)}`); } catch (error) { alert("Nie udało się zmienić nazwy."); } } } });
 </script>
 </body>
 </html>
