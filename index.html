@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Twoje Pliki</title>
     <style>
-        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background-color:#f0f2f5;margin:0;padding:20px}.hidden{display:none!important}#login-screen{text-align:center;margin-top:20vh}.login-box input{font-size:1.5em;padding:10px;width:150px;text-align:center;border:1px solid #ccc;border-radius:8px;margin:20px 0}.login-box button{font-size:1em;padding:10px 20px;cursor:pointer;border:none;background-color:#007bff;color:#fff;border-radius:8px}#error-message{color:red}#app-container{max-width:1200px;margin:0 auto}#upload-area{border:3px dashed #ccc;border-radius:15px;padding:40px;margin-bottom:30px;cursor:pointer;text-align:center;background-color:#fff}#upload-area:hover,#upload-area.drag-over{background-color:#f8f9fa;border-color:#007bff}#upload-icon{font-size:50px;color:#ccc}#file-list-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:20px;padding:20px;background-color:#fff;border-radius:8px}.file-item{position:relative;display:flex;flex-direction:column;align-items:center;padding:10px;border-radius:8px;cursor:pointer;transition:background-color .2s;-webkit-user-drag:element;}.file-item:hover{background-color:#e9ecef}.file-icon{width:70px;height:70px;background-size:cover;background-position:center;background-repeat:no-repeat;margin-bottom:10px;pointer-events:none;}.file-icon-img{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234B86F7"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M8,12H16V14H8V12M8,16H16V18H8V16Z" /></svg>')}.file-icon-txt{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%236c757d"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM18 20H6V4h7v5h5v11zM8 15h8v2H8v-2zm0-4h8v2H8v-2z" /></svg>')}.file-name{font-size:14px;text-align:center;word-break:break-all;pointer-events:none;}.file-actions{position:absolute;top:5px;right:5px;display:none;background-color:rgba(240,242,245,0.7);border-radius:10px;padding:2px;}.file-item:hover .file-actions{display:flex}.action-btn{border:none;background:0 0;border-radius:50%;width:24px;height:24px;cursor:pointer;margin-left:5px;font-size:16px;line-height:24px;}
+        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background-color:#f0f2f5;margin:0;padding:20px}.hidden{display:none!important}#login-screen{text-align:center;margin-top:20vh}.login-box input{font-size:1.5em;padding:10px;width:150px;text-align:center;border:1px solid #ccc;border-radius:8px;margin:20px 0}.login-box button{font-size:1em;padding:10px 20px;cursor:pointer;border:none;background-color:#007bff;color:#fff;border-radius:8px}#error-message{color:red}#app-container{max-width:1200px;margin:0 auto}#upload-area{border:3px dashed #ccc;border-radius:15px;padding:40px;margin-bottom:30px;cursor:pointer;text-align:center;background-color:#fff}#upload-area:hover,#upload-area.drag-over{background-color:#f8f9fa;border-color:#007bff}#upload-icon{font-size:50px;color:#ccc}#file-list-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:20px;padding:20px;background-color:#fff;border-radius:8px}.file-item{position:relative;display:flex;flex-direction:column;align-items:center;padding:10px;border-radius:8px;cursor:pointer;transition:background-color .2s;-webkit-user-drag:element;}.file-item:hover{background-color:#e9ecef}.file-icon{width:70px;height:70px;background-size:cover;background-position:center;background-repeat:no-repeat;margin-bottom:10px;pointer-events:none;background-color:#e9ecef;}.file-icon-img{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234B86F7"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M8,12H16V14H8V12M8,16H16V18H8V16Z" /></svg>')}.file-icon-txt{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%236c757d"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM18 20H6V4h7v5h5v11zM8 15h8v2H8v-2zm0-4h8v2H8v-2z" /></svg>')}.file-name{font-size:14px;text-align:center;word-break:break-all;pointer-events:none;}.file-actions{position:absolute;top:5px;right:5px;display:none;background-color:rgba(240,242,245,0.7);border-radius:10px;padding:2px;}.file-item:hover .file-actions{display:flex}.action-btn{border:none;background:0 0;border-radius:50%;width:24px;height:24px;cursor:pointer;margin-left:5px;font-size:16px;line-height:24px;}
         @media (hover: none) and (pointer: coarse), (max-width: 768px) { .file-actions { display: flex; position: static; margin-top: 10px; background-color: transparent; } .file-item:hover .file-actions { display: flex; } .file-item { padding-bottom: 5px; } }
     </style>
 </head>
@@ -32,6 +32,90 @@
     const fileInput = document.getElementById('file-input');
     const fileListContainer = document.getElementById('file-list-container');
 
+    loginButton.addEventListener('click', async () => { /* ... bez zmian ... */ });
+    accessCodeInput.addEventListener('keyup', e => { if (e.key === 'Enter') loginButton.click() });
+
+    function getAuthHeaders() { /* ... bez zmian ... */ }
+    async function forceDownload(url, filename) { /* ... bez zmian ... */ }
+    async function loadFiles() { /* ... bez zmian ... */ }
+    uploadArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', e => handleFiles(e.target.files));
+    uploadArea.addEventListener('dragover', e => { /* ... bez zmian ... */ });
+    uploadArea.addEventListener('dragleave', e => { /* ... bez zmian ... */ });
+    uploadArea.addEventListener('drop', e => { /* ... bez zmian ... */ });
+    async function handleFiles(files) { /* ... bez zmian ... */ }
+
+    // --- NOWA FUNKCJA DO BEZPIECZNEGO ŁADOWANIA PODGLĄDU ---
+    async function loadAndSetImagePreview(iconElement, imageUrl) {
+        try {
+            const response = await fetch(imageUrl, { headers: { 'Authorization': `Bearer ${sessionToken}` } });
+            if (!response.ok) throw new Error('Nie udało się załadować podglądu');
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            iconElement.style.backgroundImage = `url(${blobUrl})`;
+        } catch (error) {
+            console.error("Błąd ładowania podglądu:", error);
+            // W razie błędu, ikona zachowa domyślny wygląd
+        }
+    }
+
+    function addFileToGrid(fileName) {
+        const fileUrl = `https://huggingface.co/datasets/${REPO_ID_FOR_URL}/resolve/main/${encodeURIComponent(fileName)}`;
+        const fileExt = fileName.split('.').pop().toLowerCase();
+        
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.dataset.filename = fileName;
+        fileItem.setAttribute('draggable', 'true');
+
+        const icon = document.createElement('div');
+        icon.className = 'file-icon';
+        
+        // ZMIANA: Zamiast od razu ustawiać URL, używamy naszej nowej funkcji
+        if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(fileExt)) {
+            // Najpierw ustawiamy domyślną ikonę, która będzie widoczna podczas ładowania
+            icon.classList.add('file-icon-img'); 
+            // Następnie bezpiecznie ładujemy podgląd w tle
+            loadAndSetImagePreview(icon, fileUrl);
+        } else {
+            icon.classList.add('file-icon-img'); // Domyślna ikona dla innych plików
+        }
+
+        const name = document.createElement('span');
+        name.className = 'file-name';
+        name.textContent = fileName;
+        
+        const actions = document.createElement('div');
+        actions.className = 'file-actions';
+        actions.innerHTML = `<button class="action-btn download-btn" title="Pobierz">⬇️</button><button class="action-btn rename-btn" title="Zmień nazwę">✏️</button><button class="action-btn delete-btn" title="Usuń">🗑️</button>`;
+        
+        fileItem.append(icon, name, actions);
+        fileItem.addEventListener('dragstart', (e) => { e.dataTransfer.setData('DownloadURL', `application/octet-stream:${fileName}:${fileUrl}`); });
+        
+        fileListContainer.prepend(fileItem);
+    }
+
+    fileListContainer.addEventListener('click', async (e) => {
+        const target = e.target;
+        const fileItem = target.closest('.file-item');
+        if (!fileItem) return;
+        
+        const filename = fileItem.dataset.filename;
+        const fileUrl = `https://huggingface.co/datasets/${REPO_ID_FOR_URL}/resolve/main/${encodeURIComponent(filename)}`;
+
+        if (target.matches('.download-btn') || !target.closest('.file-actions')) {
+            forceDownload(fileUrl, filename);
+            return; // Zakończ, aby nie wykonywać innych akcji
+        }
+        
+        if (target.matches('.delete-btn')) { /* ... bez zmian ... */ }
+        if (target.matches('.rename-btn')) { /* ... bez zmian ... */ }
+    });
+    
+    // --- SKOPIUJ TUTAJ POZOSTAŁE FUNKCJE JS Z POPRZEDNIEJ WERSJI ---
+    // (loginButton.listener, accessCodeInput.listener, getAuthHeaders, forceDownload, loadFiles, handleFiles, listener dla fileListContainer)
+    
+    // Uzupełnienie skopiowanych funkcji
     loginButton.addEventListener('click', async () => {
         errorMessage.classList.add('hidden');
         try {
@@ -46,13 +130,12 @@
             errorMessage.classList.remove('hidden');
         }
     });
-    accessCodeInput.addEventListener('keyup', e => { if (e.key === 'Enter') loginButton.click() });
 
     function getAuthHeaders() {
         if (!sessionToken) throw new Error("Brak tokena sesji");
         return { 'Authorization': `Bearer ${sessionToken}`, 'Content-Type': 'application/json' };
     }
-    
+
     async function forceDownload(url, filename) {
         try {
             const response = await fetch(url, { headers: { 'Authorization': `Bearer ${sessionToken}` } });
@@ -86,11 +169,7 @@
             fileListContainer.innerHTML = `<p>Nie udało się załadować plików.</p>`;
         }
     }
-    uploadArea.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', e => handleFiles(e.target.files));
-    uploadArea.addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add('drag-over'); });
-    uploadArea.addEventListener('dragleave', e => { e.preventDefault(); e.currentTarget.classList.remove('drag-over'); });
-    uploadArea.addEventListener('drop', e => { e.preventDefault(); e.currentTarget.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
+
     async function handleFiles(files) {
         for (const file of files) {
             const formData = new FormData();
@@ -105,33 +184,6 @@
             }
         }
     }
-    
-    function addFileToGrid(fileName) {
-        const fileUrl = `https://huggingface.co/datasets/${REPO_ID_FOR_URL}/resolve/main/${encodeURIComponent(fileName)}`;
-        const fileExt = fileName.split('.').pop().toLowerCase();
-        const fileItem = document.createElement('div');
-        fileItem.className = 'file-item';
-        fileItem.dataset.filename = fileName;
-        fileItem.setAttribute('draggable', 'true');
-        const icon = document.createElement('div');
-        icon.className = 'file-icon';
-        if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(fileExt)) {
-            icon.style.backgroundImage = `url(${fileUrl})`;
-        } else {
-            icon.classList.add('file-icon-img');
-        }
-        const name = document.createElement('span');
-        name.className = 'file-name';
-        name.textContent = fileName;
-        const actions = document.createElement('div');
-        actions.className = 'file-actions';
-        actions.innerHTML = `<button class="action-btn download-btn" title="Pobierz">⬇️</button><button class="action-btn rename-btn" title="Zmień nazwę">✏️</button><button class="action-btn delete-btn" title="Usuń">🗑️</button>`;
-        fileItem.append(icon, name, actions);
-        fileItem.addEventListener('dragstart', (e) => {
-            e.dataTransfer.setData('DownloadURL', `application/octet-stream:${fileName}:${fileUrl}`);
-        });
-        fileListContainer.prepend(fileItem);
-    }
 
     fileListContainer.addEventListener('click', async (e) => {
         const target = e.target;
@@ -141,17 +193,9 @@
         const filename = fileItem.dataset.filename;
         const fileUrl = `https://huggingface.co/datasets/${REPO_ID_FOR_URL}/resolve/main/${encodeURIComponent(filename)}`;
 
-        if (target.matches('.download-btn')) {
+        if (target.matches('.download-btn') || !target.closest('.file-actions')) {
             forceDownload(fileUrl, filename);
             return;
-        }
-        
-        // ==========================================
-        // --- KLUCZOWA ZMIANA JEST TUTAJ ---
-        // Zamiast window.open, używamy naszej bezpiecznej funkcji forceDownload
-        // ==========================================
-        if (!target.closest('.file-actions')) {
-             forceDownload(fileUrl, filename);
         }
 
         if (target.matches('.delete-btn')) {
@@ -173,17 +217,15 @@
                     if (!response.ok) throw new Error('Błąd serwera');
                     fileItem.dataset.filename = newFilename;
                     fileItem.querySelector('.file-name').textContent = newFilename;
-                    const newUrl = `https://huggingface.co/datasets/${REPO_ID_FOR_URL}/resolve/main/${encodeURIComponent(newFilename)}`;
                     const icon = fileItem.querySelector('.file-icon');
-                    if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(newFilename.split('.').pop().toLowerCase())) {
-                        icon.style.backgroundImage = `url(${newUrl})`;
-                    }
+                    loadAndSetImagePreview(icon, `https://huggingface.co/datasets/${REPO_ID_FOR_URL}/resolve/main/${encodeURIComponent(newFilename)}`);
                 } catch (error) {
                     alert(`Nie udało się zmienić nazwy.`);
                 }
             }
         }
     });
+
 </script>
 </body>
 </html>
