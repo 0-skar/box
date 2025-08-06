@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Twoje Pliki</title>
     <style>
-        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background-color:#f0f2f5;margin:0;padding:20px;-webkit-user-select:none;user-select:none;}.hidden{display:none!important}#login-screen{text-align:center;margin-top:20vh}.login-box input{font-size:1.5em;padding:10px;width:150px;text-align:center;border:1px solid #ccc;border-radius:8px;margin:20px 0}.login-box button{font-size:1em;padding:10px 20px;cursor:pointer;border:none;background-color:#007bff;color:#fff;border-radius:8px}#error-message{color:red}#app-container{max-width:1200px;margin:0 auto}#upload-area{border:3px dashed #ccc;border-radius:15px;padding:40px;margin-bottom:30px;cursor:pointer;text-align:center;background-color:#fff}#upload-area:hover,#upload-area.drag-over{background-color:#f8f9fa;border-color:#007bff}#upload-icon{font-size:50px;color:#ccc}#file-list-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:20px;padding:20px;background-color:#fff;border-radius:8px;min-height:200px;}.file-item{position:relative;display:flex;flex-direction:column;align-items:center;padding:10px;border-radius:8px;cursor:pointer;transition:background-color .2s;-webkit-user-drag:element;}.file-item:hover{background-color:#e9ecef}.file-icon{width:70px;height:70px;background-size:cover;background-position:center;background-repeat:no-repeat;margin-bottom:10px;pointer-events:none;background-color:#e9ecef;}.file-icon-img{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%236c757d"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM18 20H6V4h7v5h5v11z"/></svg>')}.file-icon-txt{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234A90E2"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM18 20H6V4h7v5h5v11zM8 15h8v2H8v-2zm0-4h8v2H8v-2z"/></svg>')}.file-icon-pdf{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23D0021B"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9.5 14.5v-2H11v.5h2v-1h-2v-.5h-1.5v-2h3c.8 0 1.5.7 1.5 1.5v1c0 .8-.7 1.5-1.5 1.5h-3zm6.5 0h-1.5v-5H16v5zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z"/></svg>')}.file-icon-folder{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FFC107"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>')}.file-name{font-size:14px;text-align:center;word-break:break-all;pointer-events:none;}.file-actions{position:absolute;top:5px;right:5px;display:none;background-color:rgba(240,242,245,0.7);border-radius:10px;padding:2px;}.file-item:hover .file-actions{display:flex}.action-btn{border:none;background:0 0;border-radius:50%;width:24px;height:24px;cursor:pointer;margin-left:5px;font-size:16px;line-height:24px;}
+        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background-color:#f0f2f5;margin:0;padding:20px;-webkit-user-select:none;user-select:none;}.hidden{display:none!important}#login-screen{text-align:center;margin-top:20vh}.login-box input{font-size:1.5em;padding:10px;width:150px;text-align:center;border:1px solid #ccc;border-radius:8px;margin:20px 0}.login-box button{font-size:1em;padding:10px 20px;cursor:pointer;border:none;background-color:#007bff;color:#fff;border-radius:8px}#error-message{color:red}#app-container{max-width:1200px;margin:0 auto}#upload-area{border:3px dashed #ccc;border-radius:15px;padding:40px;margin-bottom:30px;cursor:pointer;text-align:center;background-color:#fff}#upload-area:hover,#upload-area.drag-over{background-color:#f8f9fa;border-color:#007bff}#upload-icon{font-size:50px;color:#ccc}#file-list-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:20px;padding:20px;background-color:#fff;border-radius:8px;min-height:200px;}.file-item{position:relative;display:flex;flex-direction:column;align-items:center;padding:10px;border-radius:8px;cursor:pointer;transition:background-color .2s;-webkit-user-drag:element;}.file-item:hover{background-color:#e9ecef}.file-icon{width:70px;height:70px;background-size:cover;background-position:center;background-repeat:no-repeat;margin-bottom:10px;pointer-events:none;background-color:#e9ecef;}.file-icon-img{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%236c757d"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM18 20H6V4h7v5h5v11z"/></svg>')}.file-icon-txt{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234A90E2"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM18 20H6V4h7v5h5v11zM8 15h8v2H8v-2zm0-4h8v2H8v-2z"/></svg>')}.file-icon-pdf{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23D0021B"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9.5 14.5v-2H11v.5h2v-1h-2v-.5h-1.5v-2h3c.8 0 1.5.7 1.5 1.5v1c0 .8-.7 1.5-1.5 1.5h-3zm6.5 0h-1.5v-5H16v5zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z"/></svg>')}.file-icon-folder{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FFC107"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>')}
+        /* --- NOWA IKONA --- */
+        .file-icon-zip{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%236c757d"><path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM10 4h4v2h-4V4zm10 16H4V8h2v2h2V8h8v2h2V8h2v12zM12 10h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>')}
+        .file-name{font-size:14px;text-align:center;word-break:break-all;pointer-events:none;}.file-actions{position:absolute;top:5px;right:5px;display:none;background-color:rgba(240,242,245,0.7);border-radius:10px;padding:2px;}.file-item:hover .file-actions{display:flex}.action-btn{border:none;background:0 0;border-radius:50%;width:24px;height:24px;cursor:pointer;margin-left:5px;font-size:16px;line-height:24px;}
         @media (hover: none) and (pointer: coarse), (max-width: 768px) { .file-actions { display: flex; position: static; margin-top: 10px; background-color: transparent; } .file-item:hover .file-actions { display: flex; } .file-item { padding-bottom: 5px; } }
         #modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center}
         #modal-viewer{background-color:#fff;width:90%;max-width:90vw;height:90%;max-height:90vh;border-radius:8px;display:flex;flex-direction:column}
@@ -48,6 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const PUBLIC_DATASET_URL = "https://huggingface.co/datasets/Eosforus/box/resolve/main/";
     const TEXT_FILE_EXTENSIONS = ['txt', 'md', 'json', 'js', 'py', 'css', 'html', 'log'];
     const IMAGE_FILE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'];
+    // --- ZAKTUALIZOWANE ROZSZERZENIA ---
+    const ARCHIVE_FILE_EXTENSIONS = ['zip', 'rar', '7z', 'tar'];
     let sessionToken = null;
     let currentPath = '';
     let allFilesCache = [];
@@ -195,14 +200,18 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             const fileExt = name.split('.').pop().toLowerCase();
             fileItem.setAttribute('draggable', 'true');
+            
+            // --- ZAKTUALIZOWANA LOGIKA IKON ---
             if (IMAGE_FILE_EXTENSIONS.includes(fileExt)) {
                 loadAndSetImagePreview(icon, `${BACKEND_URL}/download/${encodeURIComponent(fullPath)}`);
             } else if (fileExt === 'pdf') {
                 icon.classList.add('file-icon-pdf');
             } else if (TEXT_FILE_EXTENSIONS.includes(fileExt)) {
                 icon.classList.add('file-icon-txt');
+            } else if (ARCHIVE_FILE_EXTENSIONS.includes(fileExt)) {
+                icon.classList.add('file-icon-zip');
             } else {
-                icon.classList.add('file-icon-img');
+                icon.classList.add('file-icon-img'); // Domyślna ikona
             }
         }
 
@@ -258,9 +267,9 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const response = await fetch(`${BACKEND_URL}/create-folder`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ path: fullPath }) });
                 if (!response.ok) throw new Error('Nie udało się utworzyć folderu.');
-                const result = await response.json();
-                allFilesCache.push(`${result.path}/.gitkeep`);
-                renderFiles();
+                // --- ZAKTUALIZOWANA LOGIKA ---
+                // Zamiast ręcznie modyfikować cache, odświeżamy dane z serwera, co jest bezpieczniejsze.
+                await loadAllFilesFromServer();
             } catch (error) {
                 alert(error.message);
             }
