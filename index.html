@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pl">
-<!-- CAŁA SEKCJA <head> i <style> POZOSTAJE BEZ ZMIAN -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,7 +22,6 @@
     </style>
 </head>
 <body>
-    <!-- Reszta HTML bez zmian -->
     <div id="login-screen">
         <div class="login-box"><h1>Wprowadź kod dostępu</h1><input type="password" id="access-code" placeholder="----" maxlength="4"><button id="login-button">Wejdź</button><p id="error-message" class="hidden">Nieprawidłowy kod.</p></div>
     </div>
@@ -55,7 +53,6 @@
     </div>
 
 <script>
-// CAŁY KOD JS PRZED NASŁUCHIWACZAMI ZDARZEŃ POZOSTAJE BEZ ZMIAN
 document.addEventListener('DOMContentLoaded', () => {
 
     const BACKEND_URL = "https://eosforus-box.hf.space";
@@ -292,18 +289,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- "Nasłuchiwacze Zdarzeń" ---
 
-    dom.loginButton.addEventListener('click', /* ... */);
-    dom.accessCodeInput.addEventListener('keyup', /* ... */);
-    dom.uploadFileBtn.addEventListener('click', /* ... */);
-    // ... wszystkie nasłuchiwacze przed drag & drop bez zmian ...
+    dom.loginButton.addEventListener('click', async () => {
+        dom.errorMessage.classList.add("hidden");
+        try {
+            const response = await fetch(`${BACKEND_URL}/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: dom.accessCodeInput.value }) });
+            if (!response.ok) throw new Error("Nieprawidłowy kod");
+            const data = await response.json();
+            sessionToken = data.access_token;
+            dom.loginScreen.classList.add("hidden");
+            dom.appContainer.classList.remove("hidden");
+            loadAllFilesFromServer();
+        } catch (error) {
+            dom.errorMessage.classList.remove("hidden");
+        }
+    });
+
+    dom.accessCodeInput.addEventListener('keyup', e => { if (e.key === 'Enter') dom.loginButton.click(); });
     
-    // --- ZAKTUALIZOWANA LOGIKA DRAG & DROP ---
+    dom.uploadFileBtn.addEventListener('click', () => dom.fileInput.click());
+    dom.uploadFolderBtn.addEventListener('click', () => dom.folderInput.click());
+    dom.fileInput.addEventListener('change', e => handleFiles(e.target.files));
+    dom.folderInput.addEventListener('change', e => handleFiles(e.target.files));
+
+    dom.uploadArea.addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add("drag-over"); });
+    dom.uploadArea.addEventListener('dragleave', e => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); });
+    dom.uploadArea.addEventListener('drop', e => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); handleFiles(e.dataTransfer.files); });
+
+    dom.modalCloseBtn.addEventListener('click', () => { dom.modalOverlay.classList.add('hidden'); dom.modalImage.src = ''; });
+    dom.modalOverlay.addEventListener('click', (e) => { if (e.target === dom.modalOverlay) dom.modalCloseBtn.click(); });
+
+    dom.newFolderBtn.addEventListener('click', createNewFolder);
+    dom.appContainer.addEventListener('contextmenu', e => {
+        if (e.target.closest('#file-list-container')) {
+            e.preventDefault();
+            dom.contextMenu.style.top = `${e.clientY}px`; dom.contextMenu.style.left = `${e.clientX}px`;
+            dom.contextMenu.classList.remove('hidden');
+        }
+    });
+    let longPressTimer;
+    dom.appContainer.addEventListener('touchstart', e => { longPressTimer = setTimeout(() => { if (e.target.closest('#file-list-container')) { e.preventDefault(); const touch = e.touches[0]; dom.contextMenu.style.top = `${touch.clientY}px`; dom.contextMenu.style.left = `${touch.clientX}px`; dom.contextMenu.classList.remove('hidden'); } }, 500); });
+    dom.appContainer.addEventListener('touchend', () => clearTimeout(longPressTimer));
+    dom.appContainer.addEventListener('touchmove', () => clearTimeout(longPressTimer));
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#context-menu')) {
+            dom.contextMenu.classList.add('hidden');
+        }
+    });
     
     dom.fileListContainer.addEventListener('dragstart', (e) => {
         const fileItem = e.target.closest('.file-item');
         if (fileItem) {
             e.dataTransfer.setData('text/plain', fileItem.dataset.path);
-            e.dataTransfer.effectAllowed = 'copy'; // Zmieniamy efekt na 'copy'
+            e.dataTransfer.effectAllowed = 'copy';
         }
     });
 
@@ -343,7 +380,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                // ZMIANA: Wywołujemy nowy endpoint /copy
                 await fetch(`${BACKEND_URL}/copy`, {
                     method: 'POST',
                     headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
@@ -360,14 +396,61 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.file-item.drag-over-folder').forEach(item => item.classList.remove('drag-over-folder'));
     });
 
-    // Listener kliknięć pozostaje bez zmian
-    dom.fileListContainer.addEventListener('click', /* ... */);
+    dom.fileListContainer.addEventListener('click', async (e) => {
+        const target = e.target;
+        const fileItem = target.closest('.file-item');
+        if (!fileItem) return;
 
-    // Pozostałe listenery, które są schowane, wklejam dla kompletności
-    dom.loginButton.addEventListener('click', async () => { try { const response = await fetch(`${BACKEND_URL}/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: dom.accessCodeInput.value }) }); if (!response.ok) throw new Error("Nieprawidłowy kod"); const data = await response.json(); sessionToken = data.access_token; dom.loginScreen.classList.add("hidden"); dom.appContainer.classList.remove("hidden"); loadAllFilesFromServer(); } catch (error) { dom.errorMessage.classList.remove("hidden"); } });
-    dom.accessCodeInput.addEventListener('keyup', e => { if (e.key === 'Enter') dom.loginButton.click(); });
-    dom.uploadFileBtn.addEventListener('click', () => dom.fileInput.click()); dom.uploadFolderBtn.addEventListener('click', () => dom.folderInput.click()); dom.fileInput.addEventListener('change', e => handleFiles(e.target.files)); dom.folderInput.addEventListener('change', e => handleFiles(e.target.files)); dom.uploadArea.addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add("drag-over"); }); dom.uploadArea.addEventListener('dragleave', e => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); }); dom.uploadArea.addEventListener('drop', e => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); handleFiles(e.dataTransfer.files); }); dom.modalCloseBtn.addEventListener('click', () => { dom.modalOverlay.classList.add('hidden'); dom.modalImage.src = ''; }); dom.modalOverlay.addEventListener('click', (e) => { if (e.target === dom.modalOverlay) dom.modalCloseBtn.click(); }); dom.newFolderBtn.addEventListener('click', createNewFolder); dom.appContainer.addEventListener('contextmenu', e => { if (e.target.closest('#file-list-container')) { e.preventDefault(); dom.contextMenu.style.top = `${e.clientY}px`; dom.contextMenu.style.left = `${e.clientX}px`; dom.contextMenu.classList.remove('hidden'); } }); document.addEventListener('click', (e) => { if (!e.target.closest('#context-menu')) { dom.contextMenu.classList.add('hidden'); } });
-    dom.fileListContainer.addEventListener('click', async (e) => { const target = e.target; const fileItem = target.closest('.file-item'); if (!fileItem) return; const name = fileItem.dataset.name; const type = fileItem.dataset.type; const path = fileItem.dataset.path; if (type === 'folder' && !target.closest('.file-actions')) { currentPath = path; renderFiles(); return; } const fileExt = name.split('.').pop().toLowerCase(); const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(path)}`; if (target.matches('.download-btn')) { forceDownload(fileUrl, name); return; } if (!target.closest('.file-actions')) { if (IMAGE_FILE_EXTENSIONS.includes(fileExt)) { showModal(name, 'image'); } else if (TEXT_FILE_EXTENSIONS.includes(fileExt)) { showModal(name, 'text'); } else { forceDownload(fileUrl, name); } return; } if (target.matches('.delete-btn')) { const isFolder = type === 'folder'; const confirmMsg = isFolder ? `Czy na pewno chcesz usunąć folder "${name}" i CAŁĄ JEGO ZAWARTOŚĆ?` : `Czy na pewno chcesz usunąć plik "${name}"?`; if (!confirm(confirmMsg)) return; try { await fetch(`${BACKEND_URL}/delete`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ path }) }); await loadAllFilesFromServer(); } catch (error) { alert(`Nie udało się usunąć.`); } } if (target.matches('.rename-btn')) { const newName = prompt("Wprowadź nową nazwę:", name); if (newName && newName !== name) { const newPath = currentPath ? `${currentPath}/${newName}` : newName; try { await fetch(`${BACKEND_URL}/rename`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ old_path: path, new_path: newPath }) }); await loadAllFilesFromServer(); } catch (error) { alert("Nie udało się zmienić nazwy."); } } } });
+        const name = fileItem.dataset.name;
+        const type = fileItem.dataset.type;
+        const path = fileItem.dataset.path;
+
+        if (type === 'folder' && !target.closest('.file-actions')) {
+            currentPath = path;
+            renderFiles();
+            return;
+        }
+
+        const fileExt = name.split('.').pop().toLowerCase();
+        const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(path)}`;
+
+        if (target.matches('.download-btn')) {
+            forceDownload(fileUrl, name);
+            return;
+        }
+
+        if (!target.closest('.file-actions')) {
+            if (IMAGE_FILE_EXTENSIONS.includes(fileExt)) {
+                showModal(name, 'image');
+            } else if (TEXT_FILE_EXTENSIONS.includes(fileExt)) {
+                showModal(name, 'text');
+            } else {
+                forceDownload(fileUrl, name);
+            }
+            return;
+        }
+        
+        if (target.matches('.delete-btn')) {
+            const isFolder = type === 'folder';
+            const confirmMsg = isFolder ? `Czy na pewno chcesz usunąć folder "${name}" i CAŁĄ JEGO ZAWARTOŚĆ?` : `Czy na pewno chcesz usunąć plik "${name}"?`;
+            if (!confirm(confirmMsg)) return;
+            try {
+                await fetch(`${BACKEND_URL}/delete`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ path }) });
+                await loadAllFilesFromServer();
+            } catch (error) { alert(`Nie udało się usunąć.`); }
+        }
+        
+        if (target.matches('.rename-btn')) {
+            const newName = prompt("Wprowadź nową nazwę:", name);
+            if (newName && newName !== name) {
+                const newPath = currentPath ? `${currentPath}/${newName}` : newName;
+                try {
+                    await fetch(`${BACKEND_URL}/rename`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ old_path: path, new_path: newPath }) });
+                    await loadAllFilesFromServer();
+                } catch (error) { alert("Nie udało się zmienić nazwy."); }
+            }
+        }
+    });
 });
 </script>
 </body>
