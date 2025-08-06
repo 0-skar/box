@@ -43,7 +43,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-
+    // --- Konfiguracja i Zmienne Globalne ---
     const BACKEND_URL = "https://eosforus-box.hf.space";
     const PUBLIC_DATASET_URL = "https://huggingface.co/datasets/Eosforus/box/resolve/main/";
     const TEXT_FILE_EXTENSIONS = ['txt', 'md', 'json', 'js', 'py', 'css', 'html', 'log'];
@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentPath = '';
     let allFilesCache = [];
 
+    // --- Pobranie Elementów DOM ---
     const dom = {
         loginScreen: document.getElementById('login-screen'),
         appContainer: document.getElementById('app-container'),
@@ -72,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         newFolderBtn: document.getElementById('new-folder-btn')
     };
 
+    // --- Funkcje Pomocnicze ---
     function getAuthHeaders() {
         if (!sessionToken) throw new Error("Brak tokena sesji");
         return { 'Authorization': `Bearer ${sessionToken}` };
@@ -120,9 +122,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (type === 'image') {
             dom.modalImage.style.display = 'block';
-            dom.modalImage.src = ''; // Wyczyść stary obrazek
+            dom.modalImage.src = '';
             loadAndSetImagePreview(dom.modalImage, fileUrl);
-        } else { // type === 'text'
+        } else {
             dom.modalContentText.style.display = 'block';
             dom.modalContentCode.textContent = 'Ładowanie...';
             try {
@@ -135,6 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- Główna Logika Aplikacji ---
     function renderPathBar() {
         dom.pathBar.innerHTML = '';
         const rootSegment = document.createElement('span');
@@ -244,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const response = await fetch(`${BACKEND_URL}/upload`, { method: "POST", headers: { 'Authorization': `Bearer ${sessionToken}` }, body: formData });
                 if (!response.ok) throw new Error("Błąd serwera");
-                loadAllFilesFromServer();
+                await loadAllFilesFromServer();
             } catch (error) {
                 alert(`Nie udało się przesłać pliku: ${file.name}.`);
             }
@@ -258,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const response = await fetch(`${BACKEND_URL}/create-folder`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ path: fullPath }) });
                 if (!response.ok) throw new Error('Nie udało się utworzyć folderu.');
-                loadAllFilesFromServer();
+                await loadAllFilesFromServer(); // NAPRAWIONO: Odśwież widok po sukcesie
             } catch (error) {
                 alert(error.message);
             }
@@ -300,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.contextMenu.classList.remove('hidden');
     });
     let longPressTimer;
-    dom.appContainer.addEventListener('touchstart', e => { longPressTimer = setTimeout(() => { e.preventDefault(); const touch = e.touches[0]; dom.contextMenu.style.top = `${touch.clientY}px`; dom.contextMenu.style.left = `${touch.clientX}px`; dom.contextMenu.classList.remove('hidden'); }, 500); });
+    dom.appContainer.addEventListener('touchstart', e => { longPressTimer = setTimeout(() => { if (e.target === dom.appContainer || e.target === dom.fileListContainer) { e.preventDefault(); const touch = e.touches[0]; dom.contextMenu.style.top = `${touch.clientY}px`; dom.contextMenu.style.left = `${touch.clientX}px`; dom.contextMenu.classList.remove('hidden'); } }, 500); });
     dom.appContainer.addEventListener('touchend', () => clearTimeout(longPressTimer));
     dom.appContainer.addEventListener('touchmove', () => clearTimeout(longPressTimer));
     document.addEventListener('click', () => dom.contextMenu.classList.add('hidden'));
@@ -338,9 +341,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (!target.closest('.file-actions')) {
-            if (IMAGE_FILE_EXTENSIONS.includes(fileExt)) { showModal(name, 'image'); }
-            else if (TEXT_FILE_EXTENSIONS.includes(fileExt)) { showModal(name, 'text'); }
-            else { forceDownload(fileUrl, name); }
+            if (IMAGE_FILE_EXTENSIONS.includes(fileExt)) {
+                showModal(name, 'image');
+            } else if (TEXT_FILE_EXTENSIONS.includes(fileExt)) {
+                showModal(name, 'text');
+            } else {
+                forceDownload(fileUrl, name);
+            }
             return;
         }
         
@@ -350,7 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!confirm(confirmMsg)) return;
             try {
                 await fetch(`${BACKEND_URL}/delete`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ path }) });
-                loadAllFilesFromServer();
+                await loadAllFilesFromServer();
             } catch (error) { alert(`Nie udało się usunąć.`); }
         }
         
@@ -360,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const newPath = currentPath ? `${currentPath}/${newName}` : newName;
                 try {
                     await fetch(`${BACKEND_URL}/rename`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ old_path: path, new_path: newPath }) });
-                    loadAllFilesFromServer();
+                    await loadAllFilesFromServer();
                 } catch (error) { alert("Nie udało się zmienić nazwy."); }
             }
         }
