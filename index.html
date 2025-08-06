@@ -7,8 +7,6 @@
     <style>
         body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background-color:#f0f2f5;margin:0;padding:20px}.hidden{display:none!important}#login-screen{text-align:center;margin-top:20vh}.login-box input{font-size:1.5em;padding:10px;width:150px;text-align:center;border:1px solid #ccc;border-radius:8px;margin:20px 0}.login-box button{font-size:1em;padding:10px 20px;cursor:pointer;border:none;background-color:#007bff;color:#fff;border-radius:8px}#error-message{color:red}#app-container{max-width:1200px;margin:0 auto}#upload-area{border:3px dashed #ccc;border-radius:15px;padding:40px;margin-bottom:30px;cursor:pointer;text-align:center;background-color:#fff}#upload-area:hover,#upload-area.drag-over{background-color:#f8f9fa;border-color:#007bff}#upload-icon{font-size:50px;color:#ccc}#file-list-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:20px;padding:20px;background-color:#fff;border-radius:8px}.file-item{position:relative;display:flex;flex-direction:column;align-items:center;padding:10px;border-radius:8px;cursor:pointer;transition:background-color .2s;-webkit-user-drag:element;}.file-item:hover{background-color:#e9ecef}.file-icon{width:70px;height:70px;background-size:cover;background-position:center;background-repeat:no-repeat;margin-bottom:10px;pointer-events:none;background-color:#e9ecef;}.file-icon-img{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234B86F7"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M8,12H16V14H8V12M8,16H16V18H8V16Z" /></svg>')}.file-icon-txt{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%236c757d"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM18 20H6V4h7v5h5v11zM8 15h8v2H8v-2zm0-4h8v2H8v-2z" /></svg>')}.file-name{font-size:14px;text-align:center;word-break:break-all;pointer-events:none;}.file-actions{position:absolute;top:5px;right:5px;display:none;background-color:rgba(240,242,245,0.7);border-radius:10px;padding:2px;}.file-item:hover .file-actions{display:flex}.action-btn{border:none;background:0 0;border-radius:50%;width:24px;height:24px;cursor:pointer;margin-left:5px;font-size:16px;line-height:24px;}
         @media (hover: none) and (pointer: coarse), (max-width: 768px) { .file-actions { display: flex; position: static; margin-top: 10px; background-color: transparent; } .file-item:hover .file-actions { display: flex; } .file-item { padding-bottom: 5px; } }
-        
-        /* --- NOWE STYLE DLA OKNA MODALNEGO --- */
         #modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center}
         #modal-viewer{background-color:#fff;width:80%;max-width:800px;height:80%;max-height:80vh;border-radius:8px;display:flex;flex-direction:column}
         #modal-header{padding:10px 15px;border-bottom:1px solid #ccc;display:flex;justify-content:space-between;align-items:center}
@@ -26,24 +24,17 @@
         <div id="upload-area"><div id="upload-icon">+</div><p>Upuść pliki tutaj lub kliknij, aby wybrać</p><input type="file" id="file-input" multiple hidden></div>
         <div id="file-list-container"></div>
     </div>
-    
-    <!-- NOWA STRUKTURA HTML DLA OKNA MODALNEGO (domyślnie ukryta) -->
     <div id="modal-overlay" class="hidden">
         <div id="modal-viewer">
-            <div id="modal-header">
-                <span id="modal-filename"></span>
-                <button id="modal-close-btn" title="Zamknij">&times;</button>
-            </div>
-            <div id="modal-content">
-                <pre><code></code></pre>
-            </div>
+            <div id="modal-header"><span id="modal-filename"></span><button id="modal-close-btn" title="Zamknij">&times;</button></div>
+            <div id="modal-content"><pre><code></code></pre></div>
         </div>
     </div>
 
 <script>
     // --- Konfiguracja ---
     const BACKEND_URL = "https://eosforus-box.hf.space";
-    const PUBLIC_DATASET_URL = "https://huggingface.co/datasets/Eosforus/box/resolve/main/"; // Do drag-and-drop
+    const PUBLIC_DATASET_URL = "https://huggingface.co/datasets/Eosforus/box/resolve/main/";
     let sessionToken = null;
 
     // --- Pobranie elementów DOM ---
@@ -55,22 +46,50 @@
     const uploadArea = document.getElementById('upload-area');
     const fileInput = document.getElementById('file-input');
     const fileListContainer = document.getElementById('file-list-container');
-    // NOWE elementy modala
     const modalOverlay = document.getElementById('modal-overlay');
     const modalFilename = document.getElementById('modal-filename');
     const modalContent = document.querySelector('#modal-content pre code');
     const modalCloseBtn = document.getElementById('modal-close-btn');
     
-
     // --- Definicje Funkcji ---
 
-    function getAuthHeaders() { /* ... bez zmian ... */ }
-    async function forceDownload(url, filename) { /* ... bez zmian ... */ }
-    async function loadAndSetImagePreview(iconElement, imageUrl) { /* ... bez zmian ... */ }
-    async function loadFiles() { /* ... bez zmian ... */ }
-    async function handleFiles(files) { /* ... bez zmian ... */ }
+    function getAuthHeaders() {
+        if (!sessionToken) throw new Error("Brak tokena sesji");
+        return { 'Authorization': `Bearer ${sessionToken}` };
+    }
 
-    // NOWA funkcja do pokazywania modala
+    async function forceDownload(url, filename) {
+        try {
+            const response = await fetch(url, { headers: getAuthHeaders() });
+            if (!response.ok) throw new Error(`Błąd serwera: ${response.statusText}`);
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = blobUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(blobUrl);
+            a.remove();
+        } catch (error) {
+            console.error("Błąd pobierania:", error);
+            alert("Nie udało się pobrać pliku.");
+        }
+    }
+    
+    async function loadAndSetImagePreview(iconElement, imageUrl) {
+        try {
+            const response = await fetch(imageUrl, { headers: getAuthHeaders() });
+            if (!response.ok) throw new Error('Nie udało się załadować podglądu');
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            iconElement.style.backgroundImage = `url(${blobUrl})`;
+        } catch (error) {
+            console.error("Błąd ładowania podglądu:", error);
+        }
+    }
+    
     async function showTextFileModal(filename) {
         modalFilename.textContent = filename;
         modalContent.textContent = 'Ładowanie...';
@@ -104,7 +123,7 @@
             icon.classList.add('file-icon-img');
             loadAndSetImagePreview(icon, fileUrl);
         } else if (['txt', 'md', 'json', 'js', 'py', 'css', 'html'].includes(fileExt)) {
-            icon.classList.add('file-icon-txt'); // Dedykowana ikona dla plików tekstowych
+            icon.classList.add('file-icon-txt');
         } else {
             icon.classList.add('file-icon-img');
         }
@@ -119,31 +138,72 @@
         
         fileItem.append(icon, name, actions);
 
-        // Ulepszona obsługa przeciągania
         fileItem.addEventListener('dragstart', (e) => {
             e.dataTransfer.setData('DownloadURL', `application/octet-stream:${fileName}:${publicFileUrl}`);
         });
         
         fileListContainer.prepend(fileItem);
     }
+    
+    async function loadFiles() {
+        fileListContainer.innerHTML = "<p>Ładowanie plików...</p>";
+        try {
+            const response = await fetch(`${BACKEND_URL}/files`, { headers: getAuthHeaders() });
+            if (!response.ok) throw new Error("Błąd autoryzacji lub serwera");
+            const data = await response.json();
+            fileListContainer.innerHTML = "";
+            if (data.files && data.files.length) {
+                data.files.forEach(addFileToGrid);
+            } else {
+                fileListContainer.innerHTML = "<p>Brak plików w magazynie.</p>";
+            }
+        } catch (error) {
+            fileListContainer.innerHTML = `<p>Nie udało się załadować plików. ${error.message}</p>`;
+        }
+    }
+    
+    async function handleFiles(files) {
+        for (const file of files) {
+            const formData = new FormData();
+            formData.append('file', file);
+            try {
+                const response = await fetch(`${BACKEND_URL}/upload`, { method: "POST", headers: { 'Authorization': `Bearer ${sessionToken}` }, body: formData });
+                if (!response.ok) throw new Error("Błąd serwera");
+                const result = await response.json();
+                addFileToGrid(result.filename);
+            } catch (error) {
+                alert(`Nie udało się przesłać pliku: ${file.name}.`);
+            }
+        }
+    }
 
     // --- Dodanie "nasłuchiwaczy zdarzeń" ---
 
-    loginButton.addEventListener('click', async () => { /* ... bez zmian ... */ });
-    accessCodeInput.addEventListener('keyup', e => { if (e.key === 'Enter') loginButton.click() });
-    uploadArea.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', e => handleFiles(e.target.files));
-    uploadArea.addEventListener('dragover', e => { /* ... bez zmian ... */ });
-    uploadArea.addEventListener('dragleave', e => { /* ... bez zmian ... */ });
-    uploadArea.addEventListener('drop', e => { /* ... bez zmian ... */ });
-
-    // Zamykanie modala
-    modalCloseBtn.addEventListener('click', () => modalOverlay.classList.add('hidden'));
-    modalOverlay.addEventListener('click', (e) => {
-        if (e.target === modalOverlay) { // Jeśli kliknięto na tło, a nie na okno
-            modalOverlay.classList.add('hidden');
+    loginButton.addEventListener('click', async () => {
+        errorMessage.classList.add("hidden");
+        try {
+            const response = await fetch(`${BACKEND_URL}/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: accessCodeInput.value }) });
+            if (!response.ok) throw new Error("Nieprawidłowy kod");
+            const data = await response.json();
+            sessionToken = data.access_token;
+            loginScreen.classList.add("hidden");
+            appContainer.classList.remove("hidden");
+            loadFiles();
+        } catch (error) {
+            errorMessage.classList.remove("hidden");
         }
     });
+
+    accessCodeInput.addEventListener('keyup', e => { if (e.key === 'Enter') loginButton.click() });
+    
+    uploadArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', e => handleFiles(e.target.files));
+    uploadArea.addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add("drag-over"); });
+    uploadArea.addEventListener('dragleave', e => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); });
+    uploadArea.addEventListener('drop', e => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); handleFiles(e.dataTransfer.files); });
+
+    modalCloseBtn.addEventListener('click', () => modalOverlay.classList.add('hidden'));
+    modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) modalOverlay.classList.add('hidden'); });
 
     fileListContainer.addEventListener('click', async (e) => {
         const target = e.target;
@@ -159,30 +219,42 @@
             return;
         }
 
-        // ZMIANA: Obsługa kliknięcia na plik tekstowy
         if (!target.closest('.file-actions')) {
             if (['txt', 'md', 'json', 'js', 'py', 'css', 'html'].includes(fileExt)) {
-                showTextFileModal(filename); // Pokaż w modal-u
+                showTextFileModal(filename);
             } else {
-                forceDownload(fileUrl, filename); // Pobierz inne pliki (np. obrazy)
+                forceDownload(fileUrl, filename);
             }
             return;
         }
         
-        if (target.matches('.delete-btn')) { /* ... bez zmian ... */ }
-        if (target.matches('.rename-btn')) { /* ... bez zmian ... */ }
+        if (target.matches('.delete-btn')) {
+            if (!confirm(`Czy na pewno chcesz usunąć plik "${filename}"?`)) return;
+            try {
+                const response = await fetch(`${BACKEND_URL}/delete`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ filename }) });
+                if (!response.ok) throw new Error('Błąd serwera');
+                fileItem.remove();
+            } catch (error) {
+                alert(`Nie udało się usunąć pliku.`);
+            }
+        }
+        
+        if (target.matches('.rename-btn')) {
+            const newFilename = prompt("Wprowadź nową nazwę dla pliku:", filename);
+            if (newFilename && newFilename !== filename) {
+                try {
+                    const response = await fetch(`${BACKEND_URL}/rename`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ old_filename: filename, new_filename: newFilename }) });
+                    if (!response.ok) throw new Error("Błąd serwera");
+                    fileItem.dataset.filename = newFilename;
+                    fileItem.querySelector('.file-name').textContent = newFilename;
+                    const icon = fileItem.querySelector('.file-icon');
+                    loadAndSetImagePreview(icon, `${BACKEND_URL}/download/${encodeURIComponent(newFilename)}`);
+                } catch (error) {
+                    alert("Nie udało się zmienić nazwy.");
+                }
+            }
+        }
     });
-
-    // Uzupełnienie reszty funkcji dla kompletności
-    function getAuthHeaders(){if(!sessionToken)throw new Error("Brak tokena sesji");return{'Authorization':`Bearer ${sessionToken}`}}
-    async function forceDownload(e,t){try{const n=await fetch(e,{headers:getAuthHeaders()});if(!n.ok)throw new Error(`Błąd serwera: ${n.statusText}`);const o=await n.blob(),a=window.URL.createObjectURL(o),d=document.createElement("a");d.style.display="none",d.href=a,d.download=t,document.body.appendChild(d),d.click(),window.URL.revokeObjectURL(a),d.remove()}catch(e){console.error("Błąd pobierania:",e),alert("Nie udało się pobrać pliku.")}}
-    async function loadAndSetImagePreview(e,t){try{const n=await fetch(t,{headers:getAuthHeaders()});if(!n.ok)throw new Error("Nie udało się załadować podglądu");const o=await n.blob(),a=URL.createObjectURL(o);e.style.backgroundImage=`url(${a}`)}catch(e){console.error("Błąd ładowania podglądu:",e)}}
-    async function loadFiles(){fileListContainer.innerHTML="<p>Ładowanie plików...</p>";try{const e=await fetch(`${BACKEND_URL}/files`,{headers:getAuthHeaders()});if(!e.ok)throw new Error("Błąd autoryzacji lub serwera");const t=await e.json();fileListContainer.innerHTML="",t.files.length?t.files.forEach(addFileToGrid):fileListContainer.innerHTML="<p>Brak plików w magazynie.</p>"}catch(e){fileListContainer.innerHTML=`<p>Nie udało się załadować plików. ${e.message}</p>`}}
-    async function handleFiles(e){for(const t of e){const n=new FormData;n.append("file",t);try{const e=await fetch(`${BACKEND_URL}/upload`,{method:"POST",headers:{'Authorization':`Bearer ${sessionToken}`},body:n});if(!e.ok)throw new Error("Błąd serwera");const o=await e.json();addFileToGrid(o.filename)}catch(e){alert(`Nie udało się przesłać pliku: ${t.name}.`)}}}
-    loginButton.addEventListener("click",async()=>{errorMessage.classList.add("hidden");try{const e=await fetch(`${BACKEND_URL}/login`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:accessCodeInput.value})});if(!e.ok)throw new Error("Nieprawidłowy kod");const t=await e.json();sessionToken=t.access_token,loginScreen.classList.add("hidden"),appContainer.classList.remove("hidden"),loadFiles()}catch(e){errorMessage.classList.remove("hidden")}});
-    uploadArea.addEventListener("dragover",e=>{e.preventDefault(),e.currentTarget.classList.add("drag-over")}),uploadArea.addEventListener("dragleave",e=>{e.preventDefault(),e.currentTarget.classList.remove("drag-over")}),uploadArea.addEventListener("drop",e=>{e.preventDefault(),e.currentTarget.classList.remove("drag-over"),handleFiles(e.dataTransfer.files)});
-    fileListContainer.addEventListener("click",async e=>{const t=e.target,n=t.closest(".file-item");if(!n)return;const o=n.dataset.filename,a=o.split(".").pop().toLowerCase(),d=`${BACKEND_URL}/download/${encodeURIComponent(o)}`;if(t.matches(".download-btn"))return void forceDownload(d,o);if(!t.closest(".file-actions"))return void(["txt","md","json","js","py","css","html"].includes(a)?showTextFileModal(o):forceDownload(d,o));if(t.matches(".delete-btn")){if(!confirm(`Czy na pewno chcesz usunąć plik "${o}"?`))return;try{const e=await fetch(`${BACKEND_URL}/delete`,{method:"POST",headers:{...getAuthHeaders(),"Content-Type":"application/json"},body:JSON.stringify({filename:o})});if(!e.ok)throw new Error("Błąd serwera");n.remove()}catch(e){alert("Nie udało się usunąć pliku.")}}if(t.matches(".rename-btn")){const e=prompt("Wprowadź nową nazwę dla pliku:",o);e&&e!==o&&async function(t,e){try{const o=await fetch(`${BACKEND_URL}/rename`,{method:"POST",headers:{...getAuthHeaders(),"Content-Type":"application/json"},body:JSON.stringify({old_filename:t,new_filename:e})});if(!o.ok)throw new Error("Błąd serwera");n.dataset.filename=e,n.querySelector(".file-name").textContent=e;const a=n.querySelector(".file-icon");loadAndSetImagePreview(a,`${BACKEND_URL}/download/${encodeURIComponent(e)}`)}catch(e){alert("Nie udało się zmienić nazwy.")}}(o,e)}});
-
 </script>
 </body>
 </html>
