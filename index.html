@@ -104,28 +104,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return { 'Authorization': `Bearer ${sessionToken}`, 'Content-Type': 'application/json' };
     }
 
-    // OSTATECZNA POPRAWKA: Ta funkcja jest kluczowa
     async function forceDownload(path, filename) {
         dom.statusMessage.textContent = "Przygotowywanie pobierania...";
         try {
-            // 1. Poproś backend o bezpieczny link
-            const urlResponse = await fetch(`${BACKEND_URL}/get-download-url`, {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify({ path })
-            });
+            const urlResponse = await fetch(`${BACKEND_URL}/get-download-url`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ path }) });
             if (!urlResponse.ok) throw new Error(`Błąd serwera przy pobieraniu linku.`);
             const urlData = await urlResponse.json();
-
-            // 2. Użyj tego linku, aby pobrać zawartość pliku w tle
+            
             dom.statusMessage.textContent = "Pobieranie pliku...";
             const fileResponse = await fetch(urlData.url);
             if (!fileResponse.ok) throw new Error(`Błąd przy pobieraniu zawartości pliku.`);
             
-            // 3. Zamień zawartość na Blob
             const blob = await fileResponse.blob();
-
-            // 4. Stwórz lokalny URL do tego Bloba i kliknij go programowo
             const blobUrl = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.style.display = 'none';
@@ -150,7 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${BACKEND_URL}/get-download-url`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ path }) });
             if (!response.ok) return;
             const data = await response.json();
-            
             if (element.tagName === 'IMG') { element.src = data.url; } 
             else { element.style.backgroundImage = `url(${data.url})`; }
         } catch (error) { console.error("Błąd ładowania podglądu:", error); }
@@ -168,7 +157,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch(`${BACKEND_URL}/get-download-url`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ path }) });
                 if (!response.ok) throw new Error('Nie udało się uzyskać linku do podglądu.');
                 const data = await response.json();
-                
                 if (type === 'pdf') {
                     dom.modalPdfViewer.style.display = 'block';
                     dom.modalPdfViewer.src = data.url;
@@ -176,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     dom.modalVideoViewer.style.display = 'block';
                     dom.modalVideoViewer.src = data.url;
                     dom.modalVideoViewer.play();
-                } else { // image
+                } else {
                     dom.modalImage.style.display = 'block';
                     dom.modalImage.src = data.url;
                 }
@@ -342,26 +330,66 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.fileListContainer.addEventListener('drop', async (e) => { e.preventDefault(); const dropTarget = e.target.closest('.file-item'); document.querySelectorAll('.file-item.drag-over-folder').forEach(item => item.classList.remove('drag-over-folder')); const old_path = e.dataTransfer.getData('text/plain'); if (dropTarget && dropTarget.dataset.type === 'folder' && dropTarget.dataset.path !== old_path) { const itemName = old_path.split('/').pop(); const new_path = `${dropTarget.dataset.path}/${itemName}`; if (new_path.startsWith(old_path + '/')) { alert("Nie można skopiować folderu do jego własnego wnętrza."); return; } try { await fetch(`${BACKEND_URL}/copy`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ old_path, new_path }) }); await loadAllFilesFromServer(); } catch (error) { alert("Nie udało się skopiować elementu."); } } });
     dom.fileListContainer.addEventListener('dragend', (e) => { document.querySelectorAll('.file-item.drag-over-folder').forEach(item => item.classList.remove('drag-over-folder')); });
 
+    // KLUCZOWA ZMIANA LOGIKI JEST TUTAJ
     dom.fileListContainer.addEventListener('click', async (e) => {
         const target = e.target;
         const fileItem = target.closest('.file-item');
         if (!fileItem) return;
+
         const name = fileItem.dataset.name;
         const type = fileItem.dataset.type;
         const path = fileItem.dataset.path;
-        if (type === 'folder' && !target.closest('.file-actions')) { currentPath = path; renderFiles(); return; }
-        const fileExt = name.split('.').pop().toLowerCase();
-        if (target.matches('.download-btn')) { forceDownload(path, name); return; }
-        if (!target.closest('.file-actions')) {
-            if (IMAGE_FILE_EXTENSIONS.includes(fileExt)) { showModal(name, 'image', path); } 
-            else if (TEXT_FILE_EXTENSIONS.includes(fileExt)) { showModal(name, 'text', path); } 
-            else if (fileExt === 'pdf') { showModal(name, 'pdf', path); } 
-            else if (VIDEO_FILE_EXTENSIONS.includes(fileExt)) { showModal(name, 'video', path); } 
-            else { forceDownload(path, name); }
+
+        // Akcja dla przycisku pobierania - zawsze pobiera
+        if (target.matches('.download-btn')) {
+            forceDownload(path, name);
+            return; // Zakończ, aby nie kontynuować do logiki podglądu
+        }
+
+        // Akcja dla folderu - zawsze otwiera folder
+        if (type === 'folder' && !target.closest('.file-actions')) {
+            currentPath = path;
+            renderFiles();
             return;
         }
-        if (target.matches('.delete-btn')) { const isFolder = type === 'folder'; const confirmMsg = isFolder ? `Czy na pewno chcesz usunąć folder "${name}" i CAŁĄ JEGO ZAWARTOŚĆ?` : `Czy na pewno chcesz usunąć plik "${name}"?`; if (!confirm(confirmMsg)) return; try { await fetch(`${BACKEND_URL}/delete`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ path }) }); await loadAllFilesFromServer(); } catch (error) { alert(`Nie udało się usunąć.`); } }
-        if (target.matches('.rename-btn')) { const newName = prompt("Wprowadź nową nazwę:", name); if (newName && newName !== name) { const newPath = currentPath ? `${currentPath}/${newName}` : newName; try { await fetch(`${BACKEND_URL}/rename`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ old_path: path, new_path: newPath }) }); await loadAllFilesFromServer(); } catch (error) { alert("Nie udało się zmienić nazwy."); } } }
+        
+        // Akcja dla kliknięcia na plik (ale nie na przyciski)
+        if (!target.closest('.file-actions')) {
+            const fileExt = name.split('.').pop().toLowerCase();
+            if (IMAGE_FILE_EXTENSIONS.includes(fileExt)) {
+                showModal(name, 'image', path);
+            } else if (TEXT_FILE_EXTENSIONS.includes(fileExt)) {
+                showModal(name, 'text', path);
+            } else if (fileExt === 'pdf') {
+                showModal(name, 'pdf', path);
+            } else if (VIDEO_FILE_EXTENSIONS.includes(fileExt)) {
+                showModal(name, 'video', path);
+            }
+            // Zauważ, że usunęliśmy stąd `else { forceDownload(...) }`
+            // Teraz kliknięcie na plik bez podglądu nie robi nic.
+            return;
+        }
+        
+        // Pozostałe akcje (usuń, zmień nazwę)
+        if (target.matches('.delete-btn')) {
+            const isFolder = type === 'folder';
+            const confirmMsg = isFolder ? `Czy na pewno chcesz usunąć folder "${name}" i CAŁĄ JEGO ZAWARTOŚĆ?` : `Czy na pewno chcesz usunąć plik "${name}"?`;
+            if (!confirm(confirmMsg)) return;
+            try {
+                await fetch(`${BACKEND_URL}/delete`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ path }) });
+                await loadAllFilesFromServer();
+            } catch (error) { alert(`Nie udało się usunąć.`); }
+        }
+        if (target.matches('.rename-btn')) {
+            const newName = prompt("Wprowadź nową nazwę:", name);
+            if (newName && newName !== name) {
+                const newPath = currentPath ? `${currentPath}/${newName}` : newName;
+                try {
+                    await fetch(`${BACKEND_URL}/rename`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ old_path: path, new_path: newPath }) });
+                    await loadAllFilesFromServer();
+                } catch (error) { alert("Nie udało się zmienić nazwy."); }
+            }
+        }
     });
 });
 </script>
