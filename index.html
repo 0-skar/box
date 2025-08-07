@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pl">
-<!-- Cała sekcja head pozostaje bez zmian -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -128,12 +127,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // KLUCZOWA ZMIANA W TEJ FUNKCJI
     async function showModal(filename, type) {
         dom.modalFilename.textContent = filename;
         const fullPath = currentPath ? `${currentPath}/${filename}` : filename;
-        // Zbuduj URL z tokenem, aby iframe miał uprawnienia
-        const fileUrlWithToken = `${BACKEND_URL}/download/${encodeURIComponent(fullPath)}?token=${sessionToken}`;
+        const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(fullPath)}`;
 
         dom.modalImage.style.display = 'none';
         dom.modalContentText.style.display = 'none';
@@ -142,16 +139,15 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.modalOverlay.classList.remove('hidden');
 
         if (type === 'image') {
-            const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(fullPath)}`;
             dom.modalImage.style.display = 'block';
             dom.modalImage.src = '';
             loadAndSetImagePreview(dom.modalImage, fileUrl);
         } else if (type === 'pdf') {
             dom.modalPdfViewer.style.display = 'block';
-            // Dołączamy parametr `preview=true`
-            dom.modalPdfViewer.src = fileUrlWithToken + `&preview=true`;
+            // Dołączamy token jako parametr, aby iframe miał autoryzację
+            const previewUrl = `${fileUrl}?token=${sessionToken}&preview=true`;
+            dom.modalPdfViewer.src = previewUrl;
         } else { // 'text'
-            const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(fullPath)}`;
             dom.modalContentText.style.display = 'block';
             dom.modalContentCode.textContent = 'Ładowanie...';
             try {
@@ -164,7 +160,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Reszta funkcji JS pozostaje bez zmian...
     function renderPathBar() {
         dom.pathBar.innerHTML = '';
         const rootSegment = document.createElement('span');
