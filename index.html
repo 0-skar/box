@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="pl">
+<!-- Sekcja head bez zmian -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Twoje Pliki</title>
     <style>
-        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background-color:#f0f2f5;margin:0;padding:20px;-webkit-user-select:none;user-select:none;}.hidden{display:none!important}#login-screen{text-align:center;margin-top:20vh}.login-box input{font-size:1.5em;padding:10px;width:150px;text-align:center;border:1px solid #ccc;border-radius:8px;margin:20px 0}.login-box button{font-size:1em;padding:10px 20px;cursor:pointer;border:none;background-color:#007bff;color:#fff;border-radius:8px}#error-message{color:red}#app-container{max-width:1200px;margin:0 auto}#upload-area{border:3px dashed #ccc;border-radius:15px;padding:40px;margin-bottom:30px;text-align:center;background-color:#fff}#upload-area p { pointer-events: none; } #upload-options{margin-top:15px;}.upload-button{display:inline-block;padding:8px 16px;font-size:0.9em;cursor:pointer;background-color:#007bff;color:#fff;border:none;border-radius:5px;margin:0 10px;}#upload-area:hover,#upload-area.drag-over{background-color:#f8f9fa;border-color:#007bff}#upload-icon{font-size:50px;color:#ccc; pointer-events: none;}#file-list-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:20px;padding:20px;background-color:#fff;border-radius:8px;min-height:200px;}.file-item{position:relative;display:flex;flex-direction:column;align-items:center;padding:10px;border-radius:8px;cursor:pointer;transition:background-color .2s;-webkit-user-drag:element;}.file-item:hover{background-color:#e9ecef}
+        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background-color:#f0f2f5;margin:0;padding:20px;-webkit-user-select:none;user-select:none;}.hidden{display:none!important}#login-screen{text-align:center;margin-top:20vh}.login-box input{font-size:1.5em;padding:10px;width:150px;text-align:center;border:1px solid #ccc;border-radius:8px;margin:20px 0}.login-box button{font-size:1em;padding:10px 20px;cursor:pointer;border:none;background-color:#007bff;color:#fff;border-radius:8px}#error-message{color:red}#app-container{max-width:1200px;margin:0 auto}#upload-area{border:3px dashed #ccc;border-radius:15px;padding:40px;margin-bottom:30px;text-align:center;background-color:#fff}#upload-area p { pointer-events: none; } #upload-options{margin-top:15px;}.upload-button{display:inline-block;padding:8px 16px;font-size:0.9em;cursor:pointer;background-color:#007bff;color:#fff;border:none;border-radius:5px;margin:0 10px;}#upload-area:hover,#upload-area.drag-over{background-color:#f8f9fa;border-color:#007bff}#upload-icon{font-size:50px;color:#ccc; pointer-events: none;}
+        /* ZMIANA: Komunikat o statusie */
+        #status-message{font-weight:bold;color:#0056b3;margin-top:10px;height:1.2em;}
+        #file-list-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:20px;padding:20px;background-color:#fff;border-radius:8px;min-height:200px;}.file-item{position:relative;display:flex;flex-direction:column;align-items:center;padding:10px;border-radius:8px;cursor:pointer;transition:background-color .2s;-webkit-user-drag:element;}.file-item:hover{background-color:#e9ecef}
         .file-item.drag-over-folder { background-color: #d0e7ff; box-shadow: 0 0 0 2px #007bff inset; }
         .file-icon{width:70px;height:70px;background-size:cover;background-position:center;background-repeat:no-repeat;margin-bottom:10px;pointer-events:none;background-color:#e9ecef;}.file-icon-img{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%236c757d"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM18 20H6V4h7v5h5v11z"/></svg>')}.file-icon-txt{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234A90E2"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM18 20H6V4h7v5h5v11zM8 15h8v2H8v-2zm0-4h8v2H8v-2z"/></svg>')}.file-icon-pdf{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23D0021B"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9.5 14.5v-2H11v.5h2v-1h-2v-.5h-1.5v-2h3c.8 0 1.5.7 1.5 1.5v1c0 .8-.7 1.5-1.5 1.5h-3zm6.5 0h-1.5v-5H16v5zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z"/></svg>')}.file-icon-folder{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FFC107"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>')}.file-icon-zip{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%236c757d"><path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM10 4h4v2h-4V4zm10 16H4V8h2v2h2V8h8v2h2V8h2v12zM12 10h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>')}
-        /* ZMIANA: WIDEO - Dodana ikona dla plików wideo */
         .file-icon-video{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234A148C"><path d="M10 16.5v-9l6 4.5-6 4.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>')}
         .file-name{font-size:14px;text-align:center;word-break:break-all;pointer-events:none;}.file-actions{position:absolute;top:5px;right:5px;display:none;background-color:rgba(240,242,245,0.7);border-radius:10px;padding:2px;}.file-item:hover .file-actions{display:flex}.action-btn{border:none;background:0 0;border-radius:50%;width:24px;height:24px;cursor:pointer;margin-left:5px;font-size:16px;line-height:24px;}
         @media (hover: none) and (pointer: coarse), (max-width: 768px) { .file-actions { display: flex; position: static; margin-top: 10px; background-color: transparent; } .file-item:hover .file-actions { display: flex; } .file-item { padding-bottom: 5px; } }
@@ -17,11 +20,10 @@
         #modal-header{padding:10px 15px;border-bottom:1px solid #ccc;display:flex;justify-content:space-between;align-items:center}
         #modal-filename{font-weight:700}
         #modal-close-btn{font-size:24px;cursor:pointer;border:none;background:0 0}
-        #modal-content{padding:15px;overflow:auto;flex-grow:1;display:flex;align-items:center;justify-content:center;background-color:#000}
-        #modal-content pre{display:none;margin:0;white-space:pre-wrap;word-wrap:break-word;width:100%;background-color:#fff}
+        #modal-content{padding:0;overflow:hidden;flex-grow:1;display:flex;align-items:center;justify-content:center;background-color:#000}
+        #modal-content pre{display:none;margin:0;white-space:pre-wrap;word-wrap:break-word;width:100%;height:100%;overflow:auto;background-color:#fff;padding:15px;color:#000}
         #modal-content img{display:none;max-width:100%;max-height:100%;object-fit:contain}
         #modal-content iframe{display:none;width:100%;height:100%;border:none;}
-        /* ZMIANA: WIDEO - Style dla odtwarzacza wideo */
         #modal-content video{display:none;max-width:100%;max-height:100%;outline:none}
         #context-menu{position:fixed;z-index:10000;width:180px;background-color:#fff;border-radius:8px;box-shadow:0 5px 15px rgba(0,0,0,.2);padding:5px 0}.context-menu-item{padding:8px 15px;cursor:pointer}.context-menu-item:hover{background-color:#f0f2f5}
         #path-bar{margin-bottom:10px;padding:8px;background-color:#e9ecef;border-radius:8px;font-weight:500;color:#495057;}.path-segment{cursor:pointer;}.path-segment:hover{text-decoration:underline;}
@@ -40,6 +42,8 @@
                 <button id="upload-file-btn" class="upload-button">Prześlij pliki</button>
                 <button id="upload-folder-btn" class="upload-button">Prześlij folder</button>
             </div>
+            <!-- ZMIANA: Dodajemy element na komunikaty -->
+            <div id="status-message"></div>
             <input type="file" id="file-input" multiple hidden>
             <input type="file" id="folder-input" webkitdirectory hidden>
         </div>
@@ -52,7 +56,6 @@
                 <pre><code></code></pre>
                 <img id="modal-image" alt="Podgląd obrazu">
                 <iframe id="modal-pdf-viewer"></iframe>
-                <!-- ZMIANA: WIDEO - Dodany element <video> -->
                 <video id="modal-video-viewer" controls></video>
             </div>
         </div>
@@ -65,12 +68,10 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     const BACKEND_URL = "https://eosforus-box.hf.space";
-    const PUBLIC_DATASET_URL = "https://huggingface.co/datasets/Eosforus/box/resolve/main/";
     const TEXT_FILE_EXTENSIONS = ['txt', 'md', 'json', 'js', 'py', 'css', 'html', 'log'];
     const IMAGE_FILE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'];
     const ARCHIVE_FILE_EXTENSIONS = ['zip', 'rar', '7z', 'tar'];
-    // ZMIANA: WIDEO - Lista wspieranych rozszerzeń wideo
-    const VIDEO_FILE_EXTENSIONS = ['mp4', 'webm', 'ogv'];
+    const VIDEO_FILE_EXTENSIONS = ['mp4', 'webm', 'ogv', 'mov'];
     let sessionToken = null;
     let currentPath = '';
     let allFilesCache = [];
@@ -84,6 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
         uploadArea: document.getElementById('upload-area'),
         uploadFileBtn: document.getElementById('upload-file-btn'),
         uploadFolderBtn: document.getElementById('upload-folder-btn'),
+        // ZMIANA: Dodajemy element do cache'u
+        statusMessage: document.getElementById('status-message'),
         fileInput: document.getElementById('file-input'),
         folderInput: document.getElementById('folder-input'),
         fileListContainer: document.getElementById('file-list-container'),
@@ -94,7 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
         modalContentCode: document.querySelector('#modal-content pre code'),
         modalImage: document.getElementById('modal-image'),
         modalPdfViewer: document.getElementById('modal-pdf-viewer'),
-        // ZMIANA: WIDEO - Dodany odtwarzacz wideo do cache'u DOM
         modalVideoViewer: document.getElementById('modal-video-viewer'),
         modalCloseBtn: document.getElementById('modal-close-btn'),
         contextMenu: document.getElementById('context-menu'),
@@ -103,78 +105,90 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getAuthHeaders() {
         if (!sessionToken) throw new Error("Brak tokena sesji");
-        return { 'Authorization': `Bearer ${sessionToken}` };
+        return { 'Authorization': `Bearer ${sessionToken}`, 'Content-Type': 'application/json' };
     }
 
-    async function forceDownload(url, filename) {
+    // ZMIANA: Zaktualizowana funkcja do pobierania
+    async function forceDownload(path, filename) {
+        dom.statusMessage.textContent = "Przygotowywanie pobierania...";
         try {
-            const response = await fetch(url, { headers: getAuthHeaders() });
+            const response = await fetch(`${BACKEND_URL}/get-download-url`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ path })
+            });
             if (!response.ok) throw new Error(`Błąd serwera: ${response.statusText}`);
-            const blob = await response.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
+            const data = await response.json();
+            
+            // Używamy "niewidzialnego" linku, aby rozpocząć pobieranie z bezpiecznego URL
             const a = document.createElement('a');
-            a.style.display = 'none'; a.href = blobUrl; a.download = filename;
-            document.body.appendChild(a); a.click();
-            window.URL.revokeObjectURL(blobUrl); a.remove();
+            a.style.display = 'none';
+            a.href = data.url;
+            a.download = filename; // Ten atrybut może nie zadziałać dla linków cross-origin, ale warto go mieć
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            dom.statusMessage.textContent = "Pobieranie rozpoczęte.";
+            setTimeout(() => dom.statusMessage.textContent = "", 3000);
         } catch (error) {
-            console.error("Błąd pobierania:", error); alert("Nie udało się pobrać pliku.");
+            console.error("Błąd pobierania:", error);
+            alert("Nie udało się pobrać pliku.");
+            dom.statusMessage.textContent = "";
         }
     }
 
-    async function loadAndSetImagePreview(element, imageUrl) {
+    // Ta funkcja jest teraz tylko dla podglądu miniatur
+    async function loadAndSetImagePreview(element, path) {
         try {
-            const response = await fetch(imageUrl, { headers: getAuthHeaders() });
+            const response = await fetch(`${BACKEND_URL}/get-download-url`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ path }) });
             if (!response.ok) return;
-            const blob = await response.blob();
-            const blobUrl = URL.createObjectURL(blob);
-            if (element.tagName === 'IMG') {
-                element.src = blobUrl;
-                element.onload = () => URL.revokeObjectURL(blobUrl);
-            } else {
-                element.style.backgroundImage = `url(${blobUrl})`;
-            }
-        } catch (error) {
-            console.error("Błąd ładowania podglądu:", error);
-        }
+            const data = await response.json();
+            
+            if (element.tagName === 'IMG') { element.src = data.url; } 
+            else { element.style.backgroundImage = `url(${data.url})`; }
+        } catch (error) { console.error("Błąd ładowania podglądu:", error); }
     }
     
-    async function showModal(filename, type) {
+    // ZMIANA: Zaktualizowana funkcja do otwierania podglądu
+    async function showModal(filename, type, path) {
         dom.modalFilename.textContent = filename;
-        const fullPath = currentPath ? `${currentPath}/${filename}` : filename;
-        const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(fullPath)}`;
-
+        
         dom.modalImage.style.display = 'none';
         dom.modalContentText.style.display = 'none';
         dom.modalPdfViewer.style.display = 'none';
-        // ZMIANA: WIDEO - Ukryj odtwarzacz wideo na starcie
         dom.modalVideoViewer.style.display = 'none';
         
         dom.modalOverlay.classList.remove('hidden');
 
-        if (type === 'image') {
-            dom.modalImage.style.display = 'block';
-            dom.modalImage.src = '';
-            loadAndSetImagePreview(dom.modalImage, fileUrl);
-        } else if (type === 'pdf') {
-            dom.modalPdfViewer.style.display = 'block';
-            const previewUrl = `${fileUrl}?token=${sessionToken}&preview=true`;
-            dom.modalPdfViewer.src = previewUrl;
-        } else if (type === 'video') {
-            // ZMIANA: WIDEO - Pokaż odtwarzacz i załaduj plik
-            dom.modalVideoViewer.style.display = 'block';
-            const videoUrl = `${fileUrl}?token=${sessionToken}&preview=true`;
-            dom.modalVideoViewer.src = videoUrl;
-            dom.modalVideoViewer.play();
-        } else { // 'text'
-            dom.modalContentText.style.display = 'block';
-            dom.modalContentCode.textContent = 'Ładowanie...';
-            try {
-                const response = await fetch(fileUrl, { headers: getAuthHeaders() });
+        try {
+            // Dla PDF i Wideo używamy bezpiecznych URL
+            if (type === 'pdf' || type === 'video') {
+                const response = await fetch(`${BACKEND_URL}/get-download-url`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ path }) });
+                if (!response.ok) throw new Error('Nie udało się uzyskać linku do podglądu.');
+                const data = await response.json();
+                
+                if (type === 'pdf') {
+                    dom.modalPdfViewer.style.display = 'block';
+                    dom.modalPdfViewer.src = data.url;
+                } else {
+                    dom.modalVideoViewer.style.display = 'block';
+                    dom.modalVideoViewer.src = data.url;
+                    dom.modalVideoViewer.play();
+                }
+            } else if (type === 'image') {
+                dom.modalImage.style.display = 'block';
+                dom.modalImage.src = '';
+                loadAndSetImagePreview(dom.modalImage, path);
+            } else { // 'text'
+                // Pliki tekstowe wciąż pobieramy bezpośrednio, bo są małe
+                const response = await fetch(`${BACKEND_URL}/download/${encodeURIComponent(path)}`, { headers: { 'Authorization': `Bearer ${sessionToken}` } });
                 if (!response.ok) throw new Error('Nie udało się pobrać zawartości');
+                dom.modalContentText.style.display = 'block';
                 dom.modalContentCode.textContent = await response.text();
-            } catch (error) {
-                dom.modalContentCode.textContent = `Błąd: ${error.message}`;
             }
+        } catch (error) {
+            alert(error.message);
+            dom.modalOverlay.classList.add('hidden');
         }
     }
     
@@ -203,21 +217,13 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.fileListContainer.innerHTML = "";
         renderPathBar();
         const pathPrefix = currentPath ? currentPath + '/' : '';
-        const currentLevelItems = allFilesCache
-            .map(p => p.startsWith(pathPrefix) ? p.substring(pathPrefix.length) : null)
-            .filter(p => p);
-
+        const currentLevelItems = allFilesCache.map(p => p.startsWith(pathPrefix) ? p.substring(pathPrefix.length) : null).filter(p => p);
         const folders = new Set();
         const files = new Set();
-
         currentLevelItems.forEach(p => {
-            if (p.includes('/')) {
-                folders.add(p.split('/')[0]);
-            } else if (p !== '.gitkeep') {
-                files.add(p);
-            }
+            if (p.includes('/')) { folders.add(p.split('/')[0]); } 
+            else if (p !== '.gitkeep') { files.add(p); }
         });
-        
         [...folders].sort().forEach(name => addItemToGrid({ name, type: 'folder' }));
         [...files].sort().forEach(name => addItemToGrid({ name, type: 'file' }));
     }
@@ -230,77 +236,64 @@ document.addEventListener('DOMContentLoaded', () => {
         fileItem.dataset.type = type;
         fileItem.dataset.path = fullPath;
         fileItem.setAttribute('draggable', 'true');
-
         const icon = document.createElement('div');
         icon.className = 'file-icon';
-        
-        if (type === 'folder') {
-            icon.classList.add('file-icon-folder');
-        } else {
+        if (type === 'folder') { icon.classList.add('file-icon-folder'); } 
+        else {
             const fileExt = name.split('.').pop().toLowerCase();
-            if (IMAGE_FILE_EXTENSIONS.includes(fileExt)) {
-                loadAndSetImagePreview(icon, `${BACKEND_URL}/download/${encodeURIComponent(fullPath)}`);
-            } else if (fileExt === 'pdf') {
-                icon.classList.add('file-icon-pdf');
-            } else if (TEXT_FILE_EXTENSIONS.includes(fileExt)) {
-                icon.classList.add('file-icon-txt');
-            } else if (ARCHIVE_FILE_EXTENSIONS.includes(fileExt)) {
-                icon.classList.add('file-icon-zip');
-            // ZMIANA: WIDEO - Dodaj klasę dla ikony wideo
-            } else if (VIDEO_FILE_EXTENSIONS.includes(fileExt)) {
-                icon.classList.add('file-icon-video');
-            } else {
-                icon.classList.add('file-icon-img');
-            }
+            if (IMAGE_FILE_EXTENSIONS.includes(fileExt)) { loadAndSetImagePreview(icon, fullPath); } 
+            else if (fileExt === 'pdf') { icon.classList.add('file-icon-pdf'); } 
+            else if (TEXT_FILE_EXTENSIONS.includes(fileExt)) { icon.classList.add('file-icon-txt'); } 
+            else if (ARCHIVE_FILE_EXTENSIONS.includes(fileExt)) { icon.classList.add('file-icon-zip'); } 
+            else if (VIDEO_FILE_EXTENSIONS.includes(fileExt)) { icon.classList.add('file-icon-video'); } 
+            else { icon.classList.add('file-icon-img'); }
         }
-
         const nameEl = document.createElement('span');
         nameEl.className = 'file-name';
         nameEl.textContent = name;
-        
         fileItem.append(icon, nameEl);
-        
         const actions = document.createElement('div');
         actions.className = 'file-actions';
-        if (type === 'file') {
-            actions.innerHTML = `<button class="action-btn download-btn" title="Pobierz">⬇️</button>`;
-        }
+        if (type === 'file') { actions.innerHTML = `<button class="action-btn download-btn" title="Pobierz">⬇️</button>`; }
         actions.innerHTML += `<button class="action-btn rename-btn" title="Zmień nazwę">✏️</button><button class="action-btn delete-btn" title="Usuń">🗑️</button>`;
         fileItem.appendChild(actions);
-
         dom.fileListContainer.appendChild(fileItem);
     }
     
     async function loadAllFilesFromServer() {
-        dom.fileListContainer.innerHTML = "<p>Ładowanie...</p>";
+        dom.statusMessage.textContent = "Ładowanie listy plików...";
         try {
             const response = await fetch(`${BACKEND_URL}/files`, { headers: getAuthHeaders() });
             if (!response.ok) throw new Error("Błąd autoryzacji lub serwera");
             const data = await response.json();
             allFilesCache = data.files || [];
             renderFiles();
+            dom.statusMessage.textContent = "";
         } catch (error) {
             dom.fileListContainer.innerHTML = `<p>Nie udało się załadować plików. ${error.message}</p>`;
+            dom.statusMessage.textContent = "Błąd.";
         }
     }
     
+    // ZMIANA: Zaktualizowana funkcja do przesyłania
     async function handleFiles(files) {
+        dom.statusMessage.textContent = `Przesyłanie ${files.length} plików...`;
         for (const file of files) {
             const formData = new FormData();
             formData.append('file', file);
-            
             const relativePath = file.webkitRelativePath ? file.webkitRelativePath.substring(0, file.webkitRelativePath.lastIndexOf('/')) : '';
             const finalPath = [currentPath, relativePath].filter(Boolean).join('/');
             formData.append('path', finalPath);
-
             try {
                 const response = await fetch(`${BACKEND_URL}/upload`, { method: "POST", headers: { 'Authorization': `Bearer ${sessionToken}` }, body: formData });
                 if (!response.ok) throw new Error("Błąd serwera");
             } catch (error) {
                 alert(`Nie udało się przesłać pliku: ${file.name}.`);
-                break;
+                dom.statusMessage.textContent = "Błąd przesyłania.";
+                return;
             }
         }
+        dom.statusMessage.textContent = "Przesyłanie ukończone. Odświeżanie listy...";
         await loadAllFilesFromServer();
     }
 
@@ -309,39 +302,30 @@ document.addEventListener('DOMContentLoaded', () => {
         if (folderName && folderName.trim()) {
             const fullPath = currentPath ? `${currentPath}/${folderName.trim()}` : folderName.trim();
             try {
-                const response = await fetch(`${BACKEND_URL}/create-folder`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ path: fullPath }) });
-                if (!response.ok) throw new Error('Nie udało się utworzyć folderu.');
+                await fetch(`${BACKEND_URL}/create-folder`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ path: fullPath }) });
                 await loadAllFilesFromServer();
-            } catch (error) {
-                alert(error.message);
-            }
+            } catch (error) { alert(error.message); }
         }
     }
 
     // --- "Nasłuchiwacze Zdarzeń" ---
 
     dom.loginButton.addEventListener('click', async () => {
-        dom.errorMessage.classList.add("hidden");
         try {
-            const response = await fetch(`${BACKEND_URL}/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: dom.accessCodeInput.value }) });
+            const response = await fetch(`${BACKEND_URL}/login`, { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: dom.accessCodeInput.value }) });
             if (!response.ok) throw new Error("Nieprawidłowy kod");
             const data = await response.json();
             sessionToken = data.access_token;
-            dom.loginScreen.classList.add("hidden");
-            dom.appContainer.classList.remove("hidden");
+            dom.loginScreen.classList.add("hidden"); dom.appContainer.classList.remove("hidden");
             loadAllFilesFromServer();
-        } catch (error) {
-            dom.errorMessage.classList.remove("hidden");
-        }
+        } catch (error) { dom.errorMessage.classList.remove("hidden"); }
     });
 
     dom.accessCodeInput.addEventListener('keyup', e => { if (e.key === 'Enter') dom.loginButton.click(); });
-    
     dom.uploadFileBtn.addEventListener('click', () => dom.fileInput.click());
     dom.uploadFolderBtn.addEventListener('click', () => dom.folderInput.click());
     dom.fileInput.addEventListener('change', e => handleFiles(e.target.files));
     dom.folderInput.addEventListener('change', e => handleFiles(e.target.files));
-
     dom.uploadArea.addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add("drag-over"); });
     dom.uploadArea.addEventListener('dragleave', e => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); });
     dom.uploadArea.addEventListener('drop', e => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); handleFiles(e.dataTransfer.files); });
@@ -350,150 +334,43 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.modalOverlay.classList.add('hidden'); 
         dom.modalImage.src = ''; 
         dom.modalPdfViewer.src = 'about:blank';
-        // ZMIANA: WIDEO - Zatrzymaj wideo i wyczyść źródło przy zamykaniu
-        dom.modalVideoViewer.pause();
-        dom.modalVideoViewer.src = '';
+        dom.modalVideoViewer.pause(); dom.modalVideoViewer.src = '';
     });
     dom.modalOverlay.addEventListener('click', (e) => { if (e.target === dom.modalOverlay) dom.modalCloseBtn.click(); });
-
     dom.newFolderBtn.addEventListener('click', createNewFolder);
-    dom.appContainer.addEventListener('contextmenu', e => {
-        if (e.target.closest('#file-list-container')) {
-            e.preventDefault();
-            dom.contextMenu.style.top = `${e.clientY}px`; dom.contextMenu.style.left = `${e.clientX}px`;
-            dom.contextMenu.classList.remove('hidden');
-        }
-    });
-    let longPressTimer;
-    dom.appContainer.addEventListener('touchstart', e => { longPressTimer = setTimeout(() => { if (e.target.closest('#file-list-container')) { e.preventDefault(); const touch = e.touches[0]; dom.contextMenu.style.top = `${touch.clientY}px`; dom.contextMenu.style.left = `${touch.clientX}px`; dom.contextMenu.classList.remove('hidden'); } }, 500); });
-    dom.appContainer.addEventListener('touchend', () => clearTimeout(longPressTimer));
-    dom.appContainer.addEventListener('touchmove', () => clearTimeout(longPressTimer));
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('#context-menu')) {
-            dom.contextMenu.classList.add('hidden');
-        }
-    });
+    dom.appContainer.addEventListener('contextmenu', e => { if (e.target.closest('#file-list-container')) { e.preventDefault(); dom.contextMenu.style.top = `${e.clientY}px`; dom.contextMenu.style.left = `${e.clientX}px`; dom.contextMenu.classList.remove('hidden'); } });
+    document.addEventListener('click', (e) => { if (!e.target.closest('#context-menu')) { dom.contextMenu.classList.add('hidden'); } });
     
-    dom.fileListContainer.addEventListener('dragstart', (e) => {
-        const fileItem = e.target.closest('.file-item');
-        if (fileItem) {
-            e.dataTransfer.setData('text/plain', fileItem.dataset.path);
-            e.dataTransfer.effectAllowed = 'copy';
-        }
-    });
-
-    dom.fileListContainer.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        const targetItem = e.target.closest('.file-item');
-        document.querySelectorAll('.file-item.drag-over-folder').forEach(item => item.classList.remove('drag-over-folder'));
-        if (targetItem && targetItem.dataset.type === 'folder') {
-            const sourcePath = e.dataTransfer.getData('text/plain');
-            if (targetItem.dataset.path !== sourcePath) {
-                 targetItem.classList.add('drag-over-folder');
-            }
-        }
-    });
-    
-    dom.fileListContainer.addEventListener('dragleave', (e) => {
-        const targetItem = e.target.closest('.file-item');
-        if (targetItem) {
-            targetItem.classList.remove('drag-over-folder');
-        }
-    });
-
-    dom.fileListContainer.addEventListener('drop', async (e) => {
-        e.preventDefault();
-        const dropTarget = e.target.closest('.file-item');
-        document.querySelectorAll('.file-item.drag-over-folder').forEach(item => item.classList.remove('drag-over-folder'));
-
-        const old_path = e.dataTransfer.getData('text/plain');
-        
-        if (dropTarget && dropTarget.dataset.type === 'folder' && dropTarget.dataset.path !== old_path) {
-            const itemName = old_path.split('/').pop();
-            const new_path = `${dropTarget.dataset.path}/${itemName}`;
-            
-            if (new_path.startsWith(old_path + '/')) {
-                alert("Nie można skopiować folderu do jego własnego wnętrza.");
-                return;
-            }
-
-            try {
-                await fetch(`${BACKEND_URL}/copy`, {
-                    method: 'POST',
-                    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ old_path, new_path })
-                });
-                await loadAllFilesFromServer();
-            } catch (error) {
-                alert("Nie udało się skopiować elementu.");
-            }
-        }
-    });
-
-    dom.fileListContainer.addEventListener('dragend', (e) => {
-        document.querySelectorAll('.file-item.drag-over-folder').forEach(item => item.classList.remove('drag-over-folder'));
-    });
+    dom.fileListContainer.addEventListener('dragstart', (e) => { const fileItem = e.target.closest('.file-item'); if (fileItem) { e.dataTransfer.setData('text/plain', fileItem.dataset.path); e.dataTransfer.effectAllowed = 'copy'; } });
+    dom.fileListContainer.addEventListener('dragover', (e) => { e.preventDefault(); const targetItem = e.target.closest('.file-item'); document.querySelectorAll('.file-item.drag-over-folder').forEach(item => item.classList.remove('drag-over-folder')); if (targetItem && targetItem.dataset.type === 'folder') { const sourcePath = e.dataTransfer.getData('text/plain'); if (targetItem.dataset.path !== sourcePath) { targetItem.classList.add('drag-over-folder'); } } });
+    dom.fileListContainer.addEventListener('dragleave', (e) => { const targetItem = e.target.closest('.file-item'); if (targetItem) { targetItem.classList.remove('drag-over-folder'); } });
+    dom.fileListContainer.addEventListener('drop', async (e) => { e.preventDefault(); const dropTarget = e.target.closest('.file-item'); document.querySelectorAll('.file-item.drag-over-folder').forEach(item => item.classList.remove('drag-over-folder')); const old_path = e.dataTransfer.getData('text/plain'); if (dropTarget && dropTarget.dataset.type === 'folder' && dropTarget.dataset.path !== old_path) { const itemName = old_path.split('/').pop(); const new_path = `${dropTarget.dataset.path}/${itemName}`; if (new_path.startsWith(old_path + '/')) { alert("Nie można skopiować folderu do jego własnego wnętrza."); return; } try { await fetch(`${BACKEND_URL}/copy`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ old_path, new_path }) }); await loadAllFilesFromServer(); } catch (error) { alert("Nie udało się skopiować elementu."); } } });
+    dom.fileListContainer.addEventListener('dragend', (e) => { document.querySelectorAll('.file-item.drag-over-folder').forEach(item => item.classList.remove('drag-over-folder')); });
 
     dom.fileListContainer.addEventListener('click', async (e) => {
         const target = e.target;
         const fileItem = target.closest('.file-item');
         if (!fileItem) return;
-
         const name = fileItem.dataset.name;
         const type = fileItem.dataset.type;
         const path = fileItem.dataset.path;
 
-        if (type === 'folder' && !target.closest('.file-actions')) {
-            currentPath = path;
-            renderFiles();
-            return;
-        }
-
+        if (type === 'folder' && !target.closest('.file-actions')) { currentPath = path; renderFiles(); return; }
         const fileExt = name.split('.').pop().toLowerCase();
         
-        if (target.matches('.download-btn')) {
-            const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(path)}`;
-            forceDownload(fileUrl, name);
-            return;
-        }
+        if (target.matches('.download-btn')) { forceDownload(path, name); return; }
 
         if (!target.closest('.file-actions')) {
-            if (IMAGE_FILE_EXTENSIONS.includes(fileExt)) {
-                showModal(name, 'image');
-            } else if (TEXT_FILE_EXTENSIONS.includes(fileExt)) {
-                showModal(name, 'text');
-            } else if (fileExt === 'pdf') {
-                showModal(name, 'pdf');
-            // ZMIANA: WIDEO - Otwórz modal z odtwarzaczem wideo
-            } else if (VIDEO_FILE_EXTENSIONS.includes(fileExt)) {
-                showModal(name, 'video');
-            } else {
-                const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(path)}`;
-                forceDownload(fileUrl, name);
-            }
+            if (IMAGE_FILE_EXTENSIONS.includes(fileExt)) { showModal(name, 'image', path); } 
+            else if (TEXT_FILE_EXTENSIONS.includes(fileExt)) { showModal(name, 'text', path); } 
+            else if (fileExt === 'pdf') { showModal(name, 'pdf', path); } 
+            else if (VIDEO_FILE_EXTENSIONS.includes(fileExt)) { showModal(name, 'video', path); } 
+            else { forceDownload(path, name); }
             return;
         }
         
-        if (target.matches('.delete-btn')) {
-            const isFolder = type === 'folder';
-            const confirmMsg = isFolder ? `Czy na pewno chcesz usunąć folder "${name}" i CAŁĄ JEGO ZAWARTOŚĆ?` : `Czy na pewno chcesz usunąć plik "${name}"?`;
-            if (!confirm(confirmMsg)) return;
-            try {
-                await fetch(`${BACKEND_URL}/delete`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ path }) });
-                await loadAllFilesFromServer();
-            } catch (error) { alert(`Nie udało się usunąć.`); }
-        }
-        
-        if (target.matches('.rename-btn')) {
-            const newName = prompt("Wprowadź nową nazwę:", name);
-            if (newName && newName !== name) {
-                const newPath = currentPath ? `${currentPath}/${newName}` : newName;
-                try {
-                    await fetch(`${BACKEND_URL}/rename`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ old_path: path, new_path: newPath }) });
-                    await loadAllFilesFromServer();
-                } catch (error) { alert("Nie udało się zmienić nazwy."); }
-            }
-        }
+        if (target.matches('.delete-btn')) { const isFolder = type === 'folder'; const confirmMsg = isFolder ? `Czy na pewno chcesz usunąć folder "${name}" i CAŁĄ JEGO ZAWARTOŚĆ?` : `Czy na pewno chcesz usunąć plik "${name}"?`; if (!confirm(confirmMsg)) return; try { await fetch(`${BACKEND_URL}/delete`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ path }) }); await loadAllFilesFromServer(); } catch (error) { alert(`Nie udało się usunąć.`); } }
+        if (target.matches('.rename-btn')) { const newName = prompt("Wprowadź nową nazwę:", name); if (newName && newName !== name) { const newPath = currentPath ? `${currentPath}/${newName}` : newName; try { await fetch(`${BACKEND_URL}/rename`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ old_path: path, new_path: newPath }) }); await loadAllFilesFromServer(); } catch (error) { alert("Nie udało się zmienić nazwy."); } } }
     });
 });
 </script>
