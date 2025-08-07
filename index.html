@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pl">
+<!-- Cała sekcja head pozostaje bez zmian -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,7 +18,6 @@
         #modal-content{padding:15px;overflow:auto;flex-grow:1;display:flex;align-items:center;justify-content:center}
         #modal-content pre{display:none;margin:0;white-space:pre-wrap;word-wrap:break-word;width:100%}
         #modal-content img{display:none;max-width:100%;max-height:100%;object-fit:contain}
-        /* ZMIANA: PDF - styl dla podglądu PDF */
         #modal-content iframe{display:none;width:100%;height:100%;border:none;}
         #context-menu{position:fixed;z-index:10000;width:180px;background-color:#fff;border-radius:8px;box-shadow:0 5px 15px rgba(0,0,0,.2);padding:5px 0}.context-menu-item{padding:8px 15px;cursor:pointer}.context-menu-item:hover{background-color:#f0f2f5}
         #path-bar{margin-bottom:10px;padding:8px;background-color:#e9ecef;border-radius:8px;font-weight:500;color:#495057;}.path-segment{cursor:pointer;}.path-segment:hover{text-decoration:underline;}
@@ -47,7 +47,6 @@
             <div id="modal-content">
                 <pre><code></code></pre>
                 <img id="modal-image" alt="Podgląd obrazu">
-                <!-- ZMIANA: PDF - dodany iframe do podglądu -->
                 <iframe id="modal-pdf-viewer"></iframe>
             </div>
         </div>
@@ -86,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
         modalContentText: document.querySelector('#modal-content pre'),
         modalContentCode: document.querySelector('#modal-content pre code'),
         modalImage: document.getElementById('modal-image'),
-        // ZMIANA: PDF - dodany element do cache'u DOM
         modalPdfViewer: document.getElementById('modal-pdf-viewer'),
         modalCloseBtn: document.getElementById('modal-close-btn'),
         contextMenu: document.getElementById('context-menu'),
@@ -130,12 +128,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
+    // KLUCZOWA ZMIANA W TEJ FUNKCJI
     async function showModal(filename, type) {
         dom.modalFilename.textContent = filename;
         const fullPath = currentPath ? `${currentPath}/${filename}` : filename;
-        const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(fullPath)}`;
-        
-        // ZMIANA: PDF - ukryj wszystkie 3 typy podglądu na starcie
+        // Zbuduj URL z tokenem, aby iframe miał uprawnienia
+        const fileUrlWithToken = `${BACKEND_URL}/download/${encodeURIComponent(fullPath)}?token=${sessionToken}`;
+
         dom.modalImage.style.display = 'none';
         dom.modalContentText.style.display = 'none';
         dom.modalPdfViewer.style.display = 'none';
@@ -143,14 +142,16 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.modalOverlay.classList.remove('hidden');
 
         if (type === 'image') {
+            const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(fullPath)}`;
             dom.modalImage.style.display = 'block';
             dom.modalImage.src = '';
             loadAndSetImagePreview(dom.modalImage, fileUrl);
         } else if (type === 'pdf') {
-            // ZMIANA: PDF - pokaż iframe i załaduj plik
             dom.modalPdfViewer.style.display = 'block';
-            dom.modalPdfViewer.src = fileUrl;
+            // Dołączamy parametr `preview=true`
+            dom.modalPdfViewer.src = fileUrlWithToken + `&preview=true`;
         } else { // 'text'
+            const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(fullPath)}`;
             dom.modalContentText.style.display = 'block';
             dom.modalContentCode.textContent = 'Ładowanie...';
             try {
@@ -162,7 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-
+    
+    // Reszta funkcji JS pozostaje bez zmian...
     function renderPathBar() {
         dom.pathBar.innerHTML = '';
         const rootSegment = document.createElement('span');
@@ -328,7 +330,6 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.uploadArea.addEventListener('dragleave', e => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); });
     dom.uploadArea.addEventListener('drop', e => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); handleFiles(e.dataTransfer.files); });
 
-    // ZMIANA: PDF - wyczyść źródło iframe przy zamykaniu
     dom.modalCloseBtn.addEventListener('click', () => { 
         dom.modalOverlay.classList.add('hidden'); 
         dom.modalImage.src = ''; 
@@ -430,15 +431,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const fileExt = name.split('.').pop().toLowerCase();
-        const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(path)}`;
-
+        
         if (target.matches('.download-btn')) {
+            const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(path)}`;
             forceDownload(fileUrl, name);
             return;
         }
 
         if (!target.closest('.file-actions')) {
-            // ZMIANA: PDF - dodana obsługa podglądu PDF
             if (IMAGE_FILE_EXTENSIONS.includes(fileExt)) {
                 showModal(name, 'image');
             } else if (TEXT_FILE_EXTENSIONS.includes(fileExt)) {
@@ -446,6 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (fileExt === 'pdf') {
                 showModal(name, 'pdf');
             } else {
+                const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(path)}`;
                 forceDownload(fileUrl, name);
             }
             return;
