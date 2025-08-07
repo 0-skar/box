@@ -99,50 +99,43 @@ document.addEventListener('DOMContentLoaded', () => {
         newFolderBtn: document.getElementById('new-folder-btn')
     };
 
-    // ZMIANA: Nagłówek jest teraz prostszy
     function getAuthHeaders() {
         if (!sessionToken) throw new Error("Brak tokena sesji");
-        return { 'Authorization': `Bearer ${sessionToken}` };
+        return { 'Authorization': `Bearer ${sessionToken}`, 'Content-Type': 'application/json' };
     }
-    
-    // ZMIANA: Uproszczona funkcja do pobierania
+
+    // OSTATECZNA POPRAWKA: Superszybka funkcja pobierania
     async function forceDownload(path, filename) {
         dom.statusMessage.textContent = "Przygotowywanie pobierania...";
         try {
-            const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(path)}`;
-            const response = await fetch(fileUrl, { headers: getAuthHeaders() });
+            // 1. Poproś backend o bezpieczny, bezpośredni link
+            const response = await fetch(`${BACKEND_URL}/get-download-url`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ path })
+            });
             if (!response.ok) throw new Error(`Błąd serwera: ${response.statusText}`);
-            
-            const blob = await response.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = blobUrl;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(blobUrl);
-            a.remove();
+            const data = await response.json();
 
+            // 2. Przekieruj przeglądarkę pod ten link. To wszystko!
+            window.location.href = data.url;
+            
             dom.statusMessage.textContent = "Pobieranie rozpoczęte.";
             setTimeout(() => dom.statusMessage.textContent = "", 3000);
         } catch (error) {
             console.error("Błąd pobierania:", error);
-            alert(`Nie udało się pobrać pliku: ${error.message}`);
+            alert("Nie udało się pobrać pliku.");
             dom.statusMessage.textContent = "Błąd.";
         }
     }
 
-    // ZMIANA: Ta funkcja jest teraz tylko dla podglądu miniatur
     async function loadAndSetImagePreview(element, path) {
         try {
-            const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(path)}?token=${sessionToken}&preview=true`;
-            const response = await fetch(fileUrl); // Nie trzeba nagłówka, bo token jest w URL
+            const response = await fetch(`${BACKEND_URL}/get-download-url`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ path }) });
             if (!response.ok) return;
-            const blob = await response.blob();
-            const blobUrl = URL.createObjectURL(blob);
-            if (element.tagName === 'IMG') { element.src = blobUrl; } 
-            else { element.style.backgroundImage = `url(${blobUrl})`; }
+            const data = await response.json();
+            if (element.tagName === 'IMG') { element.src = data.url; } 
+            else { element.style.backgroundImage = `url(${data.url})`; }
         } catch (error) { console.error("Błąd ładowania podglądu:", error); }
     }
     
@@ -153,26 +146,25 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.modalPdfViewer.style.display = 'none';
         dom.modalVideoViewer.style.display = 'none';
         dom.modalOverlay.classList.remove('hidden');
-        
-        const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(path)}`;
-
         try {
-            if (type === 'pdf' || type === 'video') {
-                const previewUrl = `${fileUrl}?token=${sessionToken}&preview=true`;
+            if (type === 'pdf' || type === 'video' || type === 'image') {
+                const response = await fetch(`${BACKEND_URL}/get-download-url`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ path }) });
+                if (!response.ok) throw new Error('Nie udało się uzyskać linku do podglądu.');
+                const data = await response.json();
                 if (type === 'pdf') {
                     dom.modalPdfViewer.style.display = 'block';
-                    dom.modalPdfViewer.src = previewUrl;
-                } else {
+                    dom.modalPdfViewer.src = data.url;
+                } else if (type === 'video') {
                     dom.modalVideoViewer.style.display = 'block';
-                    dom.modalVideoViewer.src = previewUrl;
+                    dom.modalVideoViewer.src = data.url;
                     dom.modalVideoViewer.play();
+                } else {
+                    dom.modalImage.style.display = 'block';
+                    dom.modalImage.src = data.url;
                 }
-            } else if (type === 'image') {
-                dom.modalImage.style.display = 'block';
-                dom.modalImage.src = ''; // Wyczyść poprzedni obraz
-                loadAndSetImagePreview(dom.modalImage, path);
             } else { // 'text'
-                const response = await fetch(fileUrl, { headers: getAuthHeaders() });
+                const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(path)}`;
+                const response = await fetch(fileUrl, { headers: { 'Authorization': `Bearer ${sessionToken}` } });
                 if (!response.ok) throw new Error('Nie udało się pobrać zawartości');
                 dom.modalContentText.style.display = 'block';
                 dom.modalContentCode.textContent = await response.text();
@@ -183,7 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Reszta funkcji JS bez zmian
     function renderPathBar() {
         dom.pathBar.innerHTML = '';
         const rootSegment = document.createElement('span');
@@ -254,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadAllFilesFromServer() {
         dom.statusMessage.textContent = "Ładowanie listy plików...";
         try {
-            const response = await fetch(`${BACKEND_URL}/files`, { headers: getAuthHeaders() });
+            const response = await fetch(`${BACKEND_URL}/files`, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
             if (!response.ok) throw new Error("Błąd autoryzacji lub serwera");
             const data = await response.json();
             allFilesCache = data.files || [];
@@ -300,7 +291,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     dom.loginButton.addEventListener('click', async () => { try { const response = await fetch(`${BACKEND_URL}/login`, { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: dom.accessCodeInput.value }) }); if (!response.ok) throw new Error("Nieprawidłowy kod"); const data = await response.json(); sessionToken = data.access_token; dom.loginScreen.classList.add("hidden"); dom.appContainer.classList.remove("hidden"); loadAllFilesFromServer(); } catch (error) { dom.errorMessage.classList.remove("hidden"); } });
     dom.accessCodeInput.addEventListener('keyup', e => { if (e.key === 'Enter') dom.loginButton.click(); });
-    dom.uploadFileBtn.addEventListener('click', () => dom.fileInput.click()); dom.uploadFolderBtn.addEventListener('click', () => dom.folderInput.click()); dom.fileInput.addEventListener('change', e => handleFiles(e.target.files)); dom.folderInput.addEventListener('change', e => handleFiles(e.target.files)); dom.uploadArea.addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add("drag-over"); }); dom.uploadArea.addEventListener('dragleave', e => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); }); dom.uploadArea.addEventListener('drop', e => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); handleFiles(e.dataTransfer.files); });
+    dom.uploadFileBtn.addEventListener('click', () => dom.fileInput.click()); dom.uploadFolderBtn.addEventListener('click', () => dom.folderInput.click()); dom.fileInput.addEventListener('change', e => handleFiles(e.target.files)); dom.folderInput.addEventListener('change', e => handleFiles(e.target.files));
+    dom.uploadArea.addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add("drag-over"); }); dom.uploadArea.addEventListener('dragleave', e => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); }); dom.uploadArea.addEventListener('drop', e => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); handleFiles(e.dataTransfer.files); });
     dom.modalCloseBtn.addEventListener('click', () => { dom.modalOverlay.classList.add('hidden'); dom.modalImage.src = ''; dom.modalPdfViewer.src = 'about:blank'; dom.modalVideoViewer.pause(); dom.modalVideoViewer.src = ''; });
     dom.modalOverlay.addEventListener('click', (e) => { if (e.target === dom.modalOverlay) dom.modalCloseBtn.click(); });
     dom.newFolderBtn.addEventListener('click', createNewFolder);
