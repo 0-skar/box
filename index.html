@@ -16,7 +16,6 @@
         .file-item.drag-over-folder { background-color: #d0e7ff; box-shadow: 0 0 0 2px #007bff inset; }
         .file-icon{width:70px;height:70px;background-size:cover;background-position:center;background-repeat:no-repeat;margin-bottom:10px;pointer-events:none;background-color:#e9ecef;}.file-icon-img{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%236c757d"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM18 20H6V4h7v5h5v11z"/></svg>')}.file-icon-txt{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234A90E2"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM18 20H6V4h7v5h5v11zM8 15h8v2H8v-2zm0-4h8v2H8v-2z"/></svg>')}.file-icon-pdf{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23D0021B"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9.5 14.5v-2H11v.5h2v-1h-2v-.5h-1.5v-2h3c.8 0 1.5.7 1.5 1.5v1c0 .8-.7 1.5-1.5 1.5h-3zm6.5 0h-1.5v-5H16v5zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z"/></svg>')}.file-icon-folder{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FFC107"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>')}.file-icon-zip{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%236c757d"><path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM10 4h4v2h-4V4zm10 16H4V8h2v2h2V8h8v2h2V8h2v12zM12 10h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>')}
         .file-icon-video{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234A148C"><path d="M10 16.5v-9l6 4.5-6 4.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>')}
-        /* ZMIANA: AUDIO - Dodana ikona dla plików audio */
         .file-icon-audio{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23E65100"><path d="M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7zM10.5 19c-1.38 0-2.5-1.12-2.5-2.5S9.12 14 10.5 14s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>')}
         .file-name{font-size:14px;text-align:center;word-break:break-all;pointer-events:none;}.file-actions{position:absolute;top:5px;right:5px;display:none;background-color:rgba(240,242,245,0.7);border-radius:10px;padding:2px;}.file-item:hover .file-actions{display:flex}.action-btn{border:none;background:0 0;border-radius:50%;width:24px;height:24px;cursor:pointer;margin-left:5px;font-size:16px;line-height:24px;}
         @media (hover: none) and (pointer: coarse), (max-width: 768px) { .file-actions { display: flex; position: static; margin-top: 10px; background-color: transparent; } .file-item:hover .file-actions { display: flex; } .file-item { padding-bottom: 5px; } }
@@ -30,7 +29,6 @@
         #modal-content img{display:none;max-width:100%;max-height:100%;object-fit:contain}
         #modal-content iframe{display:none;width:100%;height:100%;border:none;}
         #modal-content video{display:none;max-width:100%;max-height:100%;outline:none}
-        /* ZMIANA: AUDIO - Style dla odtwarzacza audio */
         #modal-content audio{display:none;width:80%;max-width:600px}
         #context-menu{position:fixed;z-index:10000;width:180px;background-color:#fff;border-radius:8px;box-shadow:0 5px 15px rgba(0,0,0,.2);padding:5px 0}.context-menu-item{padding:8px 15px;cursor:pointer}.context-menu-item:hover{background-color:#f0f2f5}
         #path-bar{margin-bottom:10px;padding:8px;background-color:#e9ecef;border-radius:8px;font-weight:500;color:#495057;}.path-segment{cursor:pointer;}.path-segment:hover{text-decoration:underline;}
@@ -69,7 +67,6 @@
                 <img id="modal-image" alt="Podgląd obrazu">
                 <iframe id="modal-pdf-viewer"></iframe>
                 <video id="modal-video-viewer" controls></video>
-                <!-- ZMIANA: AUDIO - Dodany element <audio> -->
                 <audio id="modal-audio-viewer" controls></audio>
             </div>
         </div>
@@ -86,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const IMAGE_FILE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'];
     const ARCHIVE_FILE_EXTENSIONS = ['zip', 'rar', '7z', 'tar'];
     const VIDEO_FILE_EXTENSIONS = ['mp4', 'webm', 'ogv', 'mov'];
-    // ZMIANA: AUDIO - Lista wspieranych rozszerzeń audio
     const AUDIO_FILE_EXTENSIONS = ['mp3', 'wav', 'ogg'];
     let sessionToken = null;
     let currentPath = '';
@@ -118,7 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
         modalImage: document.getElementById('modal-image'),
         modalPdfViewer: document.getElementById('modal-pdf-viewer'),
         modalVideoViewer: document.getElementById('modal-video-viewer'),
-        // ZMIANA: AUDIO - Dodany odtwarzacz do cache'u DOM
         modalAudioViewer: document.getElementById('modal-audio-viewer'),
         modalCloseBtn: document.getElementById('modal-close-btn'),
         contextMenu: document.getElementById('context-menu'),
@@ -155,7 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.modalContentText.style.display = 'none';
         dom.modalPdfViewer.style.display = 'none';
         dom.modalVideoViewer.style.display = 'none';
-        // ZMIANA: AUDIO - Ukryj odtwarzacz audio
         dom.modalAudioViewer.style.display = 'none';
         dom.modalOverlay.classList.remove('hidden');
         
@@ -245,7 +239,6 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (TEXT_FILE_EXTENSIONS.includes(fileExt)) { icon.classList.add('file-icon-txt'); } 
             else if (ARCHIVE_FILE_EXTENSIONS.includes(fileExt)) { icon.classList.add('file-icon-zip'); } 
             else if (VIDEO_FILE_EXTENSIONS.includes(fileExt)) { icon.classList.add('file-icon-video'); } 
-            // ZMIANA: AUDIO - Dodaj klasę dla ikony audio
             else if (AUDIO_FILE_EXTENSIONS.includes(fileExt)) { icon.classList.add('file-icon-audio'); }
             else { icon.classList.add('file-icon-img'); }
         }
@@ -284,9 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const finalPath = [currentPath, relativePath].filter(Boolean).join('/');
             try {
                 await uploadFileWithProgress(file, finalPath);
-            } catch (error) {
-                break;
-            }
+            } catch (error) { break; }
         }
         dom.statusContainer.classList.add('hidden');
         dom.progressBarContainer.classList.add('hidden');
@@ -336,26 +327,27 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) { alert(error.message); }
         }
     }
+    
+    // --- NASŁUCHIWACZE ZDARZEŃ ---
 
     dom.cancelUploadBtn.addEventListener('click', () => { if (currentUploadXHR) { currentUploadXHR.abort(); } });
     dom.loginButton.addEventListener('click', async () => { try { const response = await fetch(`${BACKEND_URL}/login`, { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: dom.accessCodeInput.value }) }); if (!response.ok) throw new Error("Nieprawidłowy kod"); const data = await response.json(); sessionToken = data.access_token; dom.loginScreen.classList.add("hidden"); dom.appContainer.classList.remove("hidden"); loadAllFilesFromServer(); } catch (error) { dom.errorMessage.classList.remove("hidden"); } });
     dom.accessCodeInput.addEventListener('keyup', e => { if (e.key === 'Enter') dom.loginButton.click(); });
     dom.uploadFileBtn.addEventListener('click', () => dom.fileInput.click()); dom.uploadFolderBtn.addEventListener('click', () => dom.folderInput.click()); dom.fileInput.addEventListener('change', e => handleFiles(e.target.files)); dom.folderInput.addEventListener('change', e => handleFiles(e.target.files));
     dom.uploadArea.addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add("drag-over"); }); dom.uploadArea.addEventListener('dragleave', e => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); }); dom.uploadArea.addEventListener('drop', e => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); handleFiles(e.dataTransfer.files); });
-    
     dom.modalCloseBtn.addEventListener('click', () => { 
         dom.modalOverlay.classList.add('hidden'); 
         dom.modalImage.src = ''; 
         dom.modalPdfViewer.src = 'about:blank';
         dom.modalVideoViewer.pause(); dom.modalVideoViewer.src = '';
-        // ZMIANA: AUDIO - Zatrzymaj audio i wyczyść źródło
         dom.modalAudioViewer.pause(); dom.modalAudioViewer.src = '';
     });
-    
     dom.modalOverlay.addEventListener('click', (e) => { if (e.target === dom.modalOverlay) dom.modalCloseBtn.click(); });
     dom.newFolderBtn.addEventListener('click', createNewFolder);
     dom.appContainer.addEventListener('contextmenu', e => { if (e.target.closest('#file-list-container')) { e.preventDefault(); dom.contextMenu.style.top = `${e.clientY}px`; dom.contextMenu.style.left = `${e.clientX}px`; dom.contextMenu.classList.remove('hidden'); } });
     document.addEventListener('click', (e) => { if (!e.target.closest('#context-menu')) { dom.contextMenu.classList.add('hidden'); } });
+    
+    // PRZYWRÓCONY BLOK DLA DRAG & DROP WEWNĄTRZ APLIKACJI
     dom.fileListContainer.addEventListener('dragstart', (e) => { const fileItem = e.target.closest('.file-item'); if (fileItem) { e.dataTransfer.setData('text/plain', fileItem.dataset.path); e.dataTransfer.effectAllowed = 'copy'; } });
     dom.fileListContainer.addEventListener('dragover', (e) => { e.preventDefault(); const targetItem = e.target.closest('.file-item'); document.querySelectorAll('.file-item.drag-over-folder').forEach(item => item.classList.remove('drag-over-folder')); if (targetItem && targetItem.dataset.type === 'folder') { const sourcePath = e.dataTransfer.getData('text/plain'); if (targetItem.dataset.path !== sourcePath) { targetItem.classList.add('drag-over-folder'); } } });
     dom.fileListContainer.addEventListener('dragleave', (e) => { const targetItem = e.target.closest('.file-item'); if (targetItem) { targetItem.classList.remove('drag-over-folder'); } });
@@ -377,7 +369,6 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (TEXT_FILE_EXTENSIONS.includes(fileExt)) { showModal(name, 'text', path); } 
             else if (fileExt === 'pdf') { showModal(name, 'pdf', path); } 
             else if (VIDEO_FILE_EXTENSIONS.includes(fileExt)) { showModal(name, 'video', path); }
-            // ZMIANA: AUDIO - Otwórz modal z odtwarzaczem audio
             else if (AUDIO_FILE_EXTENSIONS.includes(fileExt)) { showModal(name, 'audio', path); }
             return;
         }
