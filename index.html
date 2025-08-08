@@ -24,12 +24,18 @@
         #modal-header{padding:10px 15px;border-bottom:1px solid #ccc;display:flex;justify-content:space-between;align-items:center}
         #modal-filename{font-weight:700}
         #modal-close-btn{font-size:24px;cursor:pointer;border:none;background:0 0}
-        #modal-content{padding:0;overflow:hidden;flex-grow:1;display:flex;align-items:center;justify-content:center;background-color:#000}
+        /* ZMIANA: PLAYLISTA - Modyfikacja kontenera i dodanie nowych stylów */
+        #modal-content{padding:0;overflow:hidden;flex-grow:1;display:flex;background-color:#000}
+        #modal-player-container {flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 15px;}
+        #modal-playlist-container {width: 280px; background-color: #f8f9fa; color: #000; overflow-y: auto; border-left: 1px solid #ccc;}
+        .playlist-item {padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #e9ecef; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .playlist-item:hover {background-color: #e9ecef;}
+        .playlist-item.active {background-color: #007bff; color: #fff; font-weight: bold;}
         #modal-content pre{display:none;margin:0;white-space:pre-wrap;word-wrap:break-word;width:100%;height:100%;overflow:auto;background-color:#fff;padding:15px;color:#000}
         #modal-content img{display:none;max-width:100%;max-height:100%;object-fit:contain}
         #modal-content iframe{display:none;width:100%;height:100%;border:none;}
         #modal-content video{display:none;max-width:100%;max-height:100%;outline:none}
-        #modal-content audio{display:none;width:80%;max-width:600px}
+        #modal-content audio{display:none;width:100%;}
         #context-menu{position:fixed;z-index:10000;width:180px;background-color:#fff;border-radius:8px;box-shadow:0 5px 15px rgba(0,0,0,.2);padding:5px 0}.context-menu-item{padding:8px 15px;cursor:pointer}.context-menu-item:hover{background-color:#f0f2f5}
         #path-bar{margin-bottom:10px;padding:8px;background-color:#e9ecef;border-radius:8px;font-weight:500;color:#495057;}.path-segment{cursor:pointer;}.path-segment:hover{text-decoration:underline;}
     </style>
@@ -62,12 +68,16 @@
     <div id="modal-overlay" class="hidden">
         <div id="modal-viewer">
             <div id="modal-header"><span id="modal-filename"></span><button id="modal-close-btn" title="Zamknij">&times;</button></div>
+            <!-- ZMIANA: PLAYLISTA - Nowa struktura HTML w modalu -->
             <div id="modal-content">
-                <pre><code></code></pre>
-                <img id="modal-image" alt="Podgląd obrazu">
-                <iframe id="modal-pdf-viewer"></iframe>
-                <video id="modal-video-viewer" controls></video>
-                <audio id="modal-audio-viewer" controls></audio>
+                <div id="modal-player-container">
+                    <pre><code></code></pre>
+                    <img id="modal-image" alt="Podgląd obrazu">
+                    <iframe id="modal-pdf-viewer"></iframe>
+                    <video id="modal-video-viewer" controls></video>
+                    <audio id="modal-audio-viewer" controls></audio>
+                </div>
+                <div id="modal-playlist-container" class="hidden"></div>
             </div>
         </div>
     </div>
@@ -88,6 +98,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentPath = '';
     let allFilesCache = [];
     let currentUploadXHR = null;
+    // ZMIANA: PLAYLISTA - Zmienne do zarządzania playlistą
+    let currentPlaylist = [];
+    let currentTrackIndex = -1;
 
     const dom = {
         loginScreen: document.getElementById('login-screen'),
@@ -117,7 +130,9 @@ document.addEventListener('DOMContentLoaded', () => {
         modalAudioViewer: document.getElementById('modal-audio-viewer'),
         modalCloseBtn: document.getElementById('modal-close-btn'),
         contextMenu: document.getElementById('context-menu'),
-        newFolderBtn: document.getElementById('new-folder-btn')
+        newFolderBtn: document.getElementById('new-folder-btn'),
+        // ZMIANA: PLAYLISTA - Dodane elementy do DOM
+        playlistContainer: document.getElementById('modal-playlist-container'),
     };
 
     function getAuthHeaders() {
@@ -145,6 +160,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     async function showModal(filename, type, path) {
+        // ZMIANA: PLAYLISTA - Ukryj playlistę domyślnie
+        dom.playlistContainer.classList.add('hidden');
+        dom.playlistContainer.innerHTML = ''; // Wyczyść
+        currentPlaylist = []; currentTrackIndex = -1; // Zresetuj
+
         dom.modalFilename.textContent = filename;
         dom.modalImage.style.display = 'none';
         dom.modalContentText.style.display = 'none';
@@ -155,20 +175,20 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(path)}`;
 
-        if (type === 'pdf' || type === 'video' || type === 'audio') {
+        if (type === 'pdf' || type === 'video') {
             const previewUrl = `${fileUrl}?token=${sessionToken}&preview=true`;
             if (type === 'pdf') {
                 dom.modalPdfViewer.style.display = 'block';
                 dom.modalPdfViewer.src = previewUrl;
-            } else if (type === 'video') {
+            } else {
                 dom.modalVideoViewer.style.display = 'block';
                 dom.modalVideoViewer.src = previewUrl;
                 dom.modalVideoViewer.play();
-            } else { // audio
-                dom.modalAudioViewer.style.display = 'block';
-                dom.modalAudioViewer.src = previewUrl;
-                dom.modalAudioViewer.play();
             }
+        } else if (type === 'audio') {
+            // ZMIANA: PLAYLISTA - Logika generowania i odtwarzania
+            generateAndDisplayPlaylist(path);
+            dom.modalAudioViewer.style.display = 'block';
         } else if (type === 'image') {
             dom.modalImage.style.display = 'block';
             dom.modalImage.src = '';
@@ -185,7 +205,64 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
+
+    // ZMIANA: PLAYLISTA - Nowe funkcje do obsługi playlisty
+    function generateAndDisplayPlaylist(currentTrackPath) {
+        const folderPath = currentTrackPath.includes('/') ? currentTrackPath.substring(0, currentTrackPath.lastIndexOf('/')) : '';
+        const pathPrefix = folderPath ? folderPath + '/' : '';
+
+        currentPlaylist = allFilesCache
+            .filter(p => {
+                const fileExt = p.split('.').pop().toLowerCase();
+                // Plik musi być w tym samym folderze i być plikiem audio
+                return p.startsWith(pathPrefix) && !p.substring(pathPrefix.length).includes('/') && AUDIO_FILE_EXTENSIONS.includes(fileExt);
+            })
+            .sort(); // Sortuj alfabetycznie
+
+        if (currentPlaylist.length > 1) {
+            dom.playlistContainer.classList.remove('hidden');
+            currentPlaylist.forEach((trackPath, index) => {
+                const trackName = trackPath.split('/').pop();
+                const item = document.createElement('div');
+                item.className = 'playlist-item';
+                item.textContent = trackName;
+                item.dataset.index = index;
+                item.onclick = () => playTrackFromPlaylist(index);
+                dom.playlistContainer.appendChild(item);
+            });
+        }
+        
+        const startIndex = currentPlaylist.indexOf(currentTrackPath);
+        playTrackFromPlaylist(startIndex !== -1 ? startIndex : 0);
+    }
+
+    function playTrackFromPlaylist(index) {
+        if (index < 0 || index >= currentPlaylist.length) return;
+
+        currentTrackIndex = index;
+        const trackPath = currentPlaylist[index];
+        const trackName = trackPath.split('/').pop();
+        
+        dom.modalFilename.textContent = trackName;
+        const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(trackPath)}?token=${sessionToken}&preview=true`;
+        dom.modalAudioViewer.src = fileUrl;
+        dom.modalAudioViewer.play();
+
+        // Podświetl aktywny utwór
+        Array.from(dom.playlistContainer.children).forEach((item, i) => {
+            item.classList.toggle('active', i === index);
+        });
+    }
+
+    // ZMIANA: PLAYLISTA - Logika autoodtwarzania następnego utworu
+    dom.modalAudioViewer.addEventListener('ended', () => {
+        if (currentPlaylist.length > 0) {
+            const nextIndex = (currentTrackIndex + 1) % currentPlaylist.length; // Pętla
+            playTrackFromPlaylist(nextIndex);
+        }
+    });
     
+    // Reszta kodu bez zmian...
     function renderPathBar() {
         dom.pathBar.innerHTML = '';
         const rootSegment = document.createElement('span');
@@ -205,7 +282,6 @@ document.addEventListener('DOMContentLoaded', () => {
             dom.pathBar.appendChild(pathSegment);
         });
     }
-    
     function renderFiles() {
         dom.fileListContainer.innerHTML = "";
         renderPathBar();
@@ -220,7 +296,6 @@ document.addEventListener('DOMContentLoaded', () => {
         [...folders].sort().forEach(name => addItemToGrid({ name, type: 'folder' }));
         [...files].sort().forEach(name => addItemToGrid({ name, type: 'file' }));
     }
-
     function addItemToGrid({ name, type }) {
         const fullPath = currentPath ? `${currentPath}/${name}` : name;
         const fileItem = document.createElement('div');
@@ -253,7 +328,6 @@ document.addEventListener('DOMContentLoaded', () => {
         fileItem.appendChild(actions);
         dom.fileListContainer.appendChild(fileItem);
     }
-    
     async function loadAllFilesFromServer() {
         dom.statusMessage.textContent = "Ładowanie listy plików...";
         try {
@@ -268,16 +342,13 @@ document.addEventListener('DOMContentLoaded', () => {
             dom.statusMessage.textContent = "Błąd.";
         }
     }
-    
     async function handleFiles(files) {
         dom.statusContainer.classList.remove('hidden');
         dom.progressBarContainer.classList.remove('hidden');
         for (const file of files) {
             const relativePath = file.webkitRelativePath ? file.webkitRelativePath.substring(0, file.webkitRelativePath.lastIndexOf('/')) : '';
             const finalPath = [currentPath, relativePath].filter(Boolean).join('/');
-            try {
-                await uploadFileWithProgress(file, finalPath);
-            } catch (error) { break; }
+            try { await uploadFileWithProgress(file, finalPath); } catch (error) { break; }
         }
         dom.statusContainer.classList.add('hidden');
         dom.progressBarContainer.classList.add('hidden');
@@ -285,7 +356,6 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.statusMessage.textContent = "Przesyłanie ukończone. Odświeżanie listy...";
         await loadAllFilesFromServer();
     }
-
     function uploadFileWithProgress(file, path) {
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
@@ -300,15 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     dom.statusMessage.textContent = `Przesyłanie: ${file.name} (${percentComplete}%)`;
                 }
             });
-            xhr.addEventListener('load', () => {
-                currentUploadXHR = null;
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    resolve(xhr.response);
-                } else {
-                    dom.statusMessage.textContent = `Błąd: ${xhr.status}`;
-                    reject(`Błąd serwera: ${xhr.status}`);
-                }
-            });
+            xhr.addEventListener('load', () => { currentUploadXHR = null; if (xhr.status >= 200 && xhr.status < 300) { resolve(xhr.response); } else { dom.statusMessage.textContent = `Błąd: ${xhr.status}`; reject(`Błąd serwera: ${xhr.status}`); } });
             xhr.addEventListener('error', () => { currentUploadXHR = null; dom.statusMessage.textContent = 'Błąd sieciowy.'; reject('Błąd sieciowy podczas przesyłania.'); });
             xhr.addEventListener('abort', () => { currentUploadXHR = null; dom.statusMessage.textContent = 'Przesyłanie anulowane.'; reject('Przesyłanie anulowane przez użytkownika.'); });
             xhr.open('POST', `${BACKEND_URL}/upload`, true);
@@ -316,38 +378,24 @@ document.addEventListener('DOMContentLoaded', () => {
             xhr.send(formData);
         });
     }
-
     async function createNewFolder() {
         const folderName = prompt("Wprowadź nazwę nowego folderu:");
         if (folderName && folderName.trim()) {
             const fullPath = currentPath ? `${currentPath}/${folderName.trim()}` : folderName.trim();
-            try {
-                await fetch(`${BACKEND_URL}/create-folder`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }, body: JSON.stringify({ path: fullPath }) });
-                await loadAllFilesFromServer();
-            } catch (error) { alert(error.message); }
+            try { await fetch(`${BACKEND_URL}/create-folder`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }, body: JSON.stringify({ path: fullPath }) }); await loadAllFilesFromServer(); } catch (error) { alert(error.message); }
         }
     }
-    
-    // --- NASŁUCHIWACZE ZDARZEŃ ---
 
     dom.cancelUploadBtn.addEventListener('click', () => { if (currentUploadXHR) { currentUploadXHR.abort(); } });
     dom.loginButton.addEventListener('click', async () => { try { const response = await fetch(`${BACKEND_URL}/login`, { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: dom.accessCodeInput.value }) }); if (!response.ok) throw new Error("Nieprawidłowy kod"); const data = await response.json(); sessionToken = data.access_token; dom.loginScreen.classList.add("hidden"); dom.appContainer.classList.remove("hidden"); loadAllFilesFromServer(); } catch (error) { dom.errorMessage.classList.remove("hidden"); } });
     dom.accessCodeInput.addEventListener('keyup', e => { if (e.key === 'Enter') dom.loginButton.click(); });
     dom.uploadFileBtn.addEventListener('click', () => dom.fileInput.click()); dom.uploadFolderBtn.addEventListener('click', () => dom.folderInput.click()); dom.fileInput.addEventListener('change', e => handleFiles(e.target.files)); dom.folderInput.addEventListener('change', e => handleFiles(e.target.files));
     dom.uploadArea.addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add("drag-over"); }); dom.uploadArea.addEventListener('dragleave', e => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); }); dom.uploadArea.addEventListener('drop', e => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); handleFiles(e.dataTransfer.files); });
-    dom.modalCloseBtn.addEventListener('click', () => { 
-        dom.modalOverlay.classList.add('hidden'); 
-        dom.modalImage.src = ''; 
-        dom.modalPdfViewer.src = 'about:blank';
-        dom.modalVideoViewer.pause(); dom.modalVideoViewer.src = '';
-        dom.modalAudioViewer.pause(); dom.modalAudioViewer.src = '';
-    });
+    dom.modalCloseBtn.addEventListener('click', () => { dom.modalOverlay.classList.add('hidden'); dom.modalImage.src = ''; dom.modalPdfViewer.src = 'about:blank'; dom.modalVideoViewer.pause(); dom.modalVideoViewer.src = ''; dom.modalAudioViewer.pause(); dom.modalAudioViewer.src = ''; });
     dom.modalOverlay.addEventListener('click', (e) => { if (e.target === dom.modalOverlay) dom.modalCloseBtn.click(); });
     dom.newFolderBtn.addEventListener('click', createNewFolder);
     dom.appContainer.addEventListener('contextmenu', e => { if (e.target.closest('#file-list-container')) { e.preventDefault(); dom.contextMenu.style.top = `${e.clientY}px`; dom.contextMenu.style.left = `${e.clientX}px`; dom.contextMenu.classList.remove('hidden'); } });
     document.addEventListener('click', (e) => { if (!e.target.closest('#context-menu')) { dom.contextMenu.classList.add('hidden'); } });
-    
-    // PRZYWRÓCONY BLOK DLA DRAG & DROP WEWNĄTRZ APLIKACJI
     dom.fileListContainer.addEventListener('dragstart', (e) => { const fileItem = e.target.closest('.file-item'); if (fileItem) { e.dataTransfer.setData('text/plain', fileItem.dataset.path); e.dataTransfer.effectAllowed = 'copy'; } });
     dom.fileListContainer.addEventListener('dragover', (e) => { e.preventDefault(); const targetItem = e.target.closest('.file-item'); document.querySelectorAll('.file-item.drag-over-folder').forEach(item => item.classList.remove('drag-over-folder')); if (targetItem && targetItem.dataset.type === 'folder') { const sourcePath = e.dataTransfer.getData('text/plain'); if (targetItem.dataset.path !== sourcePath) { targetItem.classList.add('drag-over-folder'); } } });
     dom.fileListContainer.addEventListener('dragleave', (e) => { const targetItem = e.target.closest('.file-item'); if (targetItem) { targetItem.classList.remove('drag-over-folder'); } });
