@@ -104,19 +104,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return { 'Authorization': `Bearer ${sessionToken}` };
     }
 
-    // ZMIANA: Superszybka funkcja pobierania
+    // KLUCZOWA POPRAWKA: Upraszczamy tę funkcję do maksimum
     function forceDownload(path, filename) {
         dom.statusMessage.textContent = "Rozpoczynanie pobierania...";
-        // Budujemy link do naszego endpointu, który zwróci plik jako załącznik
+        // Budujemy link do endpointu, który ZAWSZE zwróci plik jako załącznik (`preview=false` jest domyślne)
         const downloadUrl = `${BACKEND_URL}/download/${encodeURIComponent(path)}?token=${sessionToken}`;
-        // Przekierowanie przeglądarki pod ten link automatycznie rozpocznie pobieranie
+        // Proste przekierowanie przeglądarki. Resztą zajmie się serwer i nagłówek `Content-Disposition: attachment`.
         window.location.href = downloadUrl;
         setTimeout(() => dom.statusMessage.textContent = "", 2000);
     }
 
     async function loadAndSetImagePreview(element, path) {
         try {
-            // Miniatury i podglądy obrazów wciąż używają tej metody
             const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(path)}?token=${sessionToken}&preview=true`;
             const response = await fetch(fileUrl);
             if (!response.ok) return;
@@ -164,7 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Reszta kodu JS bez zmian
     function renderPathBar() {
         dom.pathBar.innerHTML = '';
         const rootSegment = document.createElement('span');
@@ -291,7 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.fileListContainer.addEventListener('dragstart', (e) => { const fileItem = e.target.closest('.file-item'); if (fileItem) { e.dataTransfer.setData('text/plain', fileItem.dataset.path); e.dataTransfer.effectAllowed = 'copy'; } });
     dom.fileListContainer.addEventListener('dragover', (e) => { e.preventDefault(); const targetItem = e.target.closest('.file-item'); document.querySelectorAll('.file-item.drag-over-folder').forEach(item => item.classList.remove('drag-over-folder')); if (targetItem && targetItem.dataset.type === 'folder') { const sourcePath = e.dataTransfer.getData('text/plain'); if (targetItem.dataset.path !== sourcePath) { targetItem.classList.add('drag-over-folder'); } } });
     dom.fileListContainer.addEventListener('dragleave', (e) => { const targetItem = e.target.closest('.file-item'); if (targetItem) { targetItem.classList.remove('drag-over-folder'); } });
-    dom.fileListContainer.addEventListener('drop', async (e) => { e.preventDefault(); const dropTarget = e.target.closest('.file-item'); document.querySelectorAll('.file-item.drag-over-folder').forEach(item => item.classList.remove('drag-over-folder')); const old_path = e.dataTransfer.getData('text/plain'); if (dropTarget && dropTarget.dataset.type === 'folder' && dropTarget.dataset.path !== old_path) { const itemName = old_path.split('/').pop(); const new_path = `${dropTarget.dataset.path}/${itemName}`; if (new_path.startsWith(old_path + '/')) { alert("Nie można skopiować folderu do jego własnego wnętrza."); return; } try { await fetch(`${BACKEND_URL}/copy`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ old_path, new_path }) }); await loadAllFilesFromServer(); } catch (error) { alert("Nie udało się skopiować elementu."); } } });
+    dom.fileListContainer.addEventListener('drop', async (e) => { e.preventDefault(); const dropTarget = e.target.closest('.file-item'); document.querySelectorAll('.file-item.drag-over-folder').forEach(item => item.classList.remove('drag-over-folder')); const old_path = e.dataTransfer.getData('text/plain'); if (dropTarget && dropTarget.dataset.type === 'folder' && dropTarget.dataset.path !== old_path) { const itemName = old_path.split('/').pop(); const new_path = `${dropTarget.dataset.path}/${itemName}`; if (new_path.startsWith(old_path + '/')) { alert("Nie można skopiować folderu do jego własnego wnętrza."); return; } try { await fetch(`${BACKEND_URL}/copy`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }, body: JSON.stringify({ old_path, new_path }) }); await loadAllFilesFromServer(); } catch (error) { alert("Nie udało się skopiować elementu."); } } });
     dom.fileListContainer.addEventListener('dragend', (e) => { document.querySelectorAll('.file-item.drag-over-folder').forEach(item => item.classList.remove('drag-over-folder')); });
 
     dom.fileListContainer.addEventListener('click', async (e) => {
@@ -311,8 +309,8 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (VIDEO_FILE_EXTENSIONS.includes(fileExt)) { showModal(name, 'video', path); }
             return;
         }
-        if (target.matches('.delete-btn')) { const isFolder = type === 'folder'; const confirmMsg = isFolder ? `Czy na pewno chcesz usunąć folder "${name}" i CAŁĄ JEGO ZAWARTOŚĆ?` : `Czy na pewno chcesz usunąć plik "${name}"?`; if (!confirm(confirmMsg)) return; try { await fetch(`${BACKEND_URL}/delete`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ path }) }); await loadAllFilesFromServer(); } catch (error) { alert(`Nie udało się usunąć.`); } }
-        if (target.matches('.rename-btn')) { const newName = prompt("Wprowadź nową nazwę:", name); if (newName && newName !== name) { const newPath = currentPath ? `${currentPath}/${newName}` : newName; try { await fetch(`${BACKEND_URL}/rename`, { method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ old_path: path, new_path: newPath }) }); await loadAllFilesFromServer(); } catch (error) { alert("Nie udało się zmienić nazwy."); } } }
+        if (target.matches('.delete-btn')) { const isFolder = type === 'folder'; const confirmMsg = isFolder ? `Czy na pewno chcesz usunąć folder "${name}" i CAŁĄ JEGO ZAWARTOŚĆ?` : `Czy na pewno chcesz usunąć plik "${name}"?`; if (!confirm(confirmMsg)) return; try { await fetch(`${BACKEND_URL}/delete`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }, body: JSON.stringify({ path }) }); await loadAllFilesFromServer(); } catch (error) { alert(`Nie udało się usunąć.`); } }
+        if (target.matches('.rename-btn')) { const newName = prompt("Wprowadź nową nazwę:", name); if (newName && newName !== name) { const newPath = currentPath ? `${currentPath}/${newName}` : newName; try { await fetch(`${BACKEND_URL}/rename`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }, body: JSON.stringify({ old_path: path, new_path: newPath }) }); await loadAllFilesFromServer(); } catch (error) { alert("Nie udało się zmienić nazwy."); } } }
     });
 });
 </script>
