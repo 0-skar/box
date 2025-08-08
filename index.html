@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Box</title>
+    <title>Twoje Pliki</title>
     <style>
         body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background-color:#f0f2f5;margin:0;padding:20px;-webkit-user-select:none;user-select:none;}.hidden{display:none!important}#login-screen{text-align:center;margin-top:20vh}.login-box input{font-size:1.5em;padding:10px;width:150px;text-align:center;border:1px solid #ccc;border-radius:8px;margin:20px 0}.login-box button{font-size:1em;padding:10px 20px;cursor:pointer;border:none;background-color:#007bff;color:#fff;border-radius:8px}#error-message{color:red}#app-container{max-width:1200px;margin:0 auto}#upload-area{border:3px dashed #ccc;border-radius:15px;padding:40px;margin-bottom:30px;text-align:center;background-color:#fff}#upload-area p { pointer-events: none; } #upload-options{margin-top:15px;}.upload-button{display:inline-block;padding:8px 16px;font-size:0.9em;cursor:pointer;background-color:#007bff;color:#fff;border:none;border-radius:5px;margin:0 10px;}#upload-area:hover,#upload-area.drag-over{background-color:#f8f9fa;border-color:#007bff}#upload-icon{font-size:50px;color:#ccc; pointer-events: none;}
         #status-message{font-weight:bold;color:#0056b3;margin-top:10px;height:1.2em;}
@@ -24,13 +24,17 @@
         #modal-header{padding:10px 15px;border-bottom:1px solid #ccc;display:flex;justify-content:space-between;align-items:center}
         #modal-filename{font-weight:700}
         #modal-close-btn{font-size:24px;cursor:pointer;border:none;background:0 0}
-        /* ZMIANA: PLAYLISTA - Modyfikacja kontenera i dodanie nowych stylów */
         #modal-content{padding:0;overflow:hidden;flex-grow:1;display:flex;background-color:#000}
         #modal-player-container {flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 15px;}
         #modal-playlist-container {width: 280px; background-color: #f8f9fa; color: #000; overflow-y: auto; border-left: 1px solid #ccc;}
-        .playlist-item {padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #e9ecef; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        /* ZMIANA: USUW. Z PLAYLISTY - Modyfikacja stylów */
+        .playlist-item {display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #e9ecef; font-size: 14px;}
+        .playlist-item-name {white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;}
         .playlist-item:hover {background-color: #e9ecef;}
         .playlist-item.active {background-color: #007bff; color: #fff; font-weight: bold;}
+        .playlist-remove-btn {background:0 0; border:none; color: #aaa; font-size:1.2em; cursor:pointer; padding: 0 5px;}
+        .playlist-remove-btn:hover {color: #dc3545;}
+        .playlist-item.active .playlist-remove-btn {color: #fff;}
         #modal-content pre{display:none;margin:0;white-space:pre-wrap;word-wrap:break-word;width:100%;height:100%;overflow:auto;background-color:#fff;padding:15px;color:#000}
         #modal-content img{display:none;max-width:100%;max-height:100%;object-fit:contain}
         #modal-content iframe{display:none;width:100%;height:100%;border:none;}
@@ -68,7 +72,6 @@
     <div id="modal-overlay" class="hidden">
         <div id="modal-viewer">
             <div id="modal-header"><span id="modal-filename"></span><button id="modal-close-btn" title="Zamknij">&times;</button></div>
-            <!-- ZMIANA: PLAYLISTA - Nowa struktura HTML w modalu -->
             <div id="modal-content">
                 <div id="modal-player-container">
                     <pre><code></code></pre>
@@ -98,7 +101,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentPath = '';
     let allFilesCache = [];
     let currentUploadXHR = null;
-    // ZMIANA: PLAYLISTA - Zmienne do zarządzania playlistą
     let currentPlaylist = [];
     let currentTrackIndex = -1;
 
@@ -131,39 +133,17 @@ document.addEventListener('DOMContentLoaded', () => {
         modalCloseBtn: document.getElementById('modal-close-btn'),
         contextMenu: document.getElementById('context-menu'),
         newFolderBtn: document.getElementById('new-folder-btn'),
-        // ZMIANA: PLAYLISTA - Dodane elementy do DOM
         playlistContainer: document.getElementById('modal-playlist-container'),
     };
 
-    function getAuthHeaders() {
-        if (!sessionToken) throw new Error("Brak tokena sesji");
-        return { 'Authorization': `Bearer ${sessionToken}` };
-    }
-
-    function forceDownload(path, filename) {
-        dom.statusMessage.textContent = "Rozpoczynanie pobierania...";
-        const downloadUrl = `${BACKEND_URL}/download/${encodeURIComponent(path)}?token=${sessionToken}`;
-        window.location.href = downloadUrl;
-        setTimeout(() => dom.statusMessage.textContent = "", 2000);
-    }
-
-    async function loadAndSetImagePreview(element, path) {
-        try {
-            const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(path)}?token=${sessionToken}&preview=true`;
-            const response = await fetch(fileUrl);
-            if (!response.ok) return;
-            const blob = await response.blob();
-            const blobUrl = URL.createObjectURL(blob);
-            if (element.tagName === 'IMG') { element.src = blobUrl; } 
-            else { element.style.backgroundImage = `url(${blobUrl})`; }
-        } catch (error) { console.error("Błąd ładowania podglądu:", error); }
-    }
+    function getAuthHeaders() { if (!sessionToken) throw new Error("Brak tokena sesji"); return { 'Authorization': `Bearer ${sessionToken}` }; }
+    function forceDownload(path, filename) { dom.statusMessage.textContent = "Rozpoczynanie pobierania..."; const downloadUrl = `${BACKEND_URL}/download/${encodeURIComponent(path)}?token=${sessionToken}`; window.location.href = downloadUrl; setTimeout(() => dom.statusMessage.textContent = "", 2000); }
+    async function loadAndSetImagePreview(element, path) { try { const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(path)}?token=${sessionToken}&preview=true`; const response = await fetch(fileUrl); if (!response.ok) return; const blob = await response.blob(); const blobUrl = URL.createObjectURL(blob); if (element.tagName === 'IMG') { element.src = blobUrl; } else { element.style.backgroundImage = `url(${blobUrl})`; } } catch (error) { console.error("Błąd ładowania podglądu:", error); } }
     
     async function showModal(filename, type, path) {
-        // ZMIANA: PLAYLISTA - Ukryj playlistę domyślnie
         dom.playlistContainer.classList.add('hidden');
-        dom.playlistContainer.innerHTML = ''; // Wyczyść
-        currentPlaylist = []; currentTrackIndex = -1; // Zresetuj
+        dom.playlistContainer.innerHTML = '';
+        currentPlaylist = []; currentTrackIndex = -1;
 
         dom.modalFilename.textContent = filename;
         dom.modalImage.style.display = 'none';
@@ -177,17 +157,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (type === 'pdf' || type === 'video') {
             const previewUrl = `${fileUrl}?token=${sessionToken}&preview=true`;
-            if (type === 'pdf') {
-                dom.modalPdfViewer.style.display = 'block';
-                dom.modalPdfViewer.src = previewUrl;
-            } else {
-                dom.modalVideoViewer.style.display = 'block';
-                dom.modalVideoViewer.src = previewUrl;
-                dom.modalVideoViewer.play();
-            }
+            if (type === 'pdf') { dom.modalPdfViewer.style.display = 'block'; dom.modalPdfViewer.src = previewUrl; } 
+            else { dom.modalVideoViewer.style.display = 'block'; dom.modalVideoViewer.src = previewUrl; dom.modalVideoViewer.play(); }
         } else if (type === 'audio') {
-            // ZMIANA: PLAYLISTA - Logika generowania i odtwarzania
-            generateAndDisplayPlaylist(path);
+            buildAndPlayPlaylist(path);
             dom.modalAudioViewer.style.display = 'block';
         } else if (type === 'image') {
             dom.modalImage.style.display = 'block';
@@ -199,65 +172,98 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!response.ok) throw new Error('Nie udało się pobrać zawartości');
                 dom.modalContentText.style.display = 'block';
                 dom.modalContentCode.textContent = await response.text();
-            } catch (error) {
-                alert(error.message);
-                dom.modalOverlay.classList.add('hidden');
-            }
+            } catch (error) { alert(error.message); dom.modalOverlay.classList.add('hidden'); }
         }
     }
 
-    // ZMIANA: PLAYLISTA - Nowe funkcje do obsługi playlisty
-    function generateAndDisplayPlaylist(currentTrackPath) {
+    function buildAndPlayPlaylist(currentTrackPath) {
         const folderPath = currentTrackPath.includes('/') ? currentTrackPath.substring(0, currentTrackPath.lastIndexOf('/')) : '';
         const pathPrefix = folderPath ? folderPath + '/' : '';
-
-        currentPlaylist = allFilesCache
-            .filter(p => {
-                const fileExt = p.split('.').pop().toLowerCase();
-                // Plik musi być w tym samym folderze i być plikiem audio
-                return p.startsWith(pathPrefix) && !p.substring(pathPrefix.length).includes('/') && AUDIO_FILE_EXTENSIONS.includes(fileExt);
-            })
-            .sort(); // Sortuj alfabetycznie
-
+        currentPlaylist = allFilesCache.filter(p => { const fileExt = p.split('.').pop().toLowerCase(); return p.startsWith(pathPrefix) && !p.substring(pathPrefix.length).includes('/') && AUDIO_FILE_EXTENSIONS.includes(fileExt); }).sort();
+        renderPlaylist();
+        const startIndex = currentPlaylist.indexOf(currentTrackPath);
+        playTrackFromPlaylist(startIndex !== -1 ? startIndex : 0);
+    }
+    
+    // ZMIANA: USUW. Z PLAYLISTY - Nowa funkcja do renderowania playlisty
+    function renderPlaylist() {
+        dom.playlistContainer.innerHTML = '';
         if (currentPlaylist.length > 1) {
             dom.playlistContainer.classList.remove('hidden');
             currentPlaylist.forEach((trackPath, index) => {
                 const trackName = trackPath.split('/').pop();
                 const item = document.createElement('div');
                 item.className = 'playlist-item';
-                item.textContent = trackName;
                 item.dataset.index = index;
                 item.onclick = () => playTrackFromPlaylist(index);
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'playlist-item-name';
+                nameSpan.textContent = trackName;
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'playlist-remove-btn';
+                removeBtn.innerHTML = '&times;'; // 'x' symbol
+                removeBtn.onclick = (e) => removeTrackFromPlaylist(e, index);
+
+                item.appendChild(nameSpan);
+                item.appendChild(removeBtn);
                 dom.playlistContainer.appendChild(item);
             });
+        } else {
+            dom.playlistContainer.classList.add('hidden');
         }
+    }
+
+    // ZMIANA: USUW. Z PLAYLISTY - Nowa funkcja do usuwania utworów
+    function removeTrackFromPlaylist(event, indexToRemove) {
+        event.stopPropagation(); // Zapobiegaj odtworzeniu utworu po kliknięciu 'x'
         
-        const startIndex = currentPlaylist.indexOf(currentTrackPath);
-        playTrackFromPlaylist(startIndex !== -1 ? startIndex : 0);
+        const wasPlaying = currentTrackIndex === indexToRemove;
+        currentPlaylist.splice(indexToRemove, 1); // Usuń utwór z tablicy
+
+        if (currentPlaylist.length === 0) {
+            dom.modalAudioViewer.pause();
+            dom.modalCloseBtn.click(); // Zamknij modal, jeśli playlista jest pusta
+            return;
+        }
+
+        // Popraw `currentTrackIndex` jeśli usunięto utwór przed aktualnie odtwarzanym
+        if (indexToRemove < currentTrackIndex) {
+            currentTrackIndex--;
+        }
+
+        renderPlaylist(); // Odśwież widok playlisty
+
+        if (wasPlaying) {
+            // Jeśli usunięto aktualny utwór, odtwórz następny (lub ostatni, jeśli to był ostatni)
+            const nextIndex = Math.min(indexToRemove, currentPlaylist.length - 1);
+            playTrackFromPlaylist(nextIndex);
+        } else {
+            // Jeśli usunięto inny utwór, tylko podświetl ten, który wciąż gra
+            Array.from(dom.playlistContainer.children).forEach((item, i) => {
+                item.classList.toggle('active', i === currentTrackIndex);
+            });
+        }
     }
 
     function playTrackFromPlaylist(index) {
         if (index < 0 || index >= currentPlaylist.length) return;
-
         currentTrackIndex = index;
         const trackPath = currentPlaylist[index];
         const trackName = trackPath.split('/').pop();
-        
         dom.modalFilename.textContent = trackName;
         const fileUrl = `${BACKEND_URL}/download/${encodeURIComponent(trackPath)}?token=${sessionToken}&preview=true`;
         dom.modalAudioViewer.src = fileUrl;
         dom.modalAudioViewer.play();
-
-        // Podświetl aktywny utwór
         Array.from(dom.playlistContainer.children).forEach((item, i) => {
             item.classList.toggle('active', i === index);
         });
     }
 
-    // ZMIANA: PLAYLISTA - Logika autoodtwarzania następnego utworu
     dom.modalAudioViewer.addEventListener('ended', () => {
         if (currentPlaylist.length > 0) {
-            const nextIndex = (currentTrackIndex + 1) % currentPlaylist.length; // Pętla
+            const nextIndex = (currentTrackIndex + 1) % currentPlaylist.length;
             playTrackFromPlaylist(nextIndex);
         }
     });
